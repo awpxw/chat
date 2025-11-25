@@ -21,3 +21,19 @@ spring:
       password: 123456
       database: 0
       timeout: 2000
+
+# todo搬到nacos上
+redisson:
+  # 单机模式（最常用）
+  address: redis://127.0.0.1:6379
+  database: 0
+  password: yourpassword
+  # 集群、主从、哨兵模式也支持，直接改配置
+
+# todo搬到nacos上
+minio:
+  endpoint: http://127.0.0.1:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: mall
+  domain: https://img.yourdomain.com   # 可选：用 CDN 域名
