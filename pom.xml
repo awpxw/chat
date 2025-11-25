@@ -6,15 +6,14 @@
   <artifactId>chat</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-<!--  <modules>-->
-<!--    <module>enterprise-chat-common</module>      &lt;!&ndash; 公共工具、常量、异常 &ndash;&gt;-->
-<!--    <module>enterprise-chat-auth</module>        &lt;!&ndash; 认证中心 &ndash;&gt;-->
-<!--    <module>enterprise-chat-message</module>     &lt;!&ndash; 消息核心 &ndash;&gt;-->
-<!--    <module>enterprise-chat-customer</module>    &lt;!&ndash; 在线客服 &ndash;&gt;-->
-<!--    <module>enterprise-chat-admin</module>       &lt;!&ndash; 运营后台 &ndash;&gt;-->
-<!--    <module>enterprise-chat-gateway</module>     &lt;!&ndash; 网关（可选） &ndash;&gt;-->
-<!--  </modules>-->
+  <modules>
+    <module>common</module>
+    <module>auth</module>
+    <module>message</module>
+    <module>customer</module>
+    <module>admin</module>
+    <module>gateway</module>
+  </modules>
 
   <!-- 统一编码 & 编译版本 -->
   <properties>
@@ -32,6 +31,8 @@
     <caffeine.version>3.1.8</caffeine.version>
     <knife4j.version>4.5.0</knife4j.version>
     <jackson.version>2.17.2</jackson.version>
+    <jjwt.version>0.12.6</jjwt.version>
+    <test.version>4.0.0</test.version>
   </properties>
 
   <dependencyManagement>
@@ -106,6 +107,35 @@
         <artifactId>postgresql</artifactId>
         <scope>runtime</scope>
       </dependency>
+
+      <!-- JWT 三件套（最新版） -->
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <version>${test.version}</version>
+        <scope>test</scope>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
