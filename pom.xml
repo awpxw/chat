@@ -27,12 +27,14 @@
     <hutool.version>5.8.28</hutool.version>
     <lombok.version>1.18.34</lombok.version>
     <fastjson2.version>2.0.52</fastjson2.version>
-    <redis.version>7.4.0</redis.version>
+    <redis.version>4.0.0</redis.version>
     <caffeine.version>3.1.8</caffeine.version>
     <knife4j.version>4.5.0</knife4j.version>
     <jackson.version>2.17.2</jackson.version>
     <jjwt.version>0.12.6</jjwt.version>
     <test.version>4.0.0</test.version>
+    <velocity.version>2.3</velocity.version>
+    <aop.version>3.5.7</aop.version>
   </properties>
 
   <dependencyManagement>
@@ -79,6 +81,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-redis</artifactId>
+        <version>${redis.version}</version>
       </dependency>
 
       <!-- Caffeine 本地缓存 -->
@@ -134,6 +137,24 @@
         <artifactId>spring-boot-starter-test</artifactId>
         <version>${test.version}</version>
         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-generator</artifactId>
+        <version>${mybatis-plus.version}}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-engine-core</artifactId>
+        <version>${velocity.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+        <version>${spring-boot.version}</version>
       </dependency>
 
     </dependencies>

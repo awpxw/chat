@@ -5,11 +5,12 @@ import org.slf4j.MDC;
 
 import java.util.UUID;
 
-// RequestIdUtil.java
 @Slf4j
 public class RequestIdUtil {
     private static final String REQUEST_ID_KEY = "requestId";
     private static final ThreadLocal<String> REQUEST_ID_HOLDER = new ThreadLocal<>();
+
+    private RequestIdUtil() {}
 
     /**
      * 生成并设置 requestId

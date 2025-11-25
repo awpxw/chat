@@ -11,3 +11,13 @@ mybatis-plus:
     # 开发环境可以被 profile 覆盖
   mapper-locations: classpath*:mapper/**/*Mapper.xml
   type-aliases-package: com.aw.**.domain
+
+# todo搬到nacos上
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 2000
