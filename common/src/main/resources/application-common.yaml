@@ -1,0 +1,13 @@
+# todo搬到nacos上
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id                    # 雪花算法（后面补 IdWorker）
+      logic-delete-field: deleted           # 全局逻辑删除字段
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl   # 生产环境关闭 SQL 日志
+    # 开发环境可以被 profile 覆盖
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: com.aw.**.domain
