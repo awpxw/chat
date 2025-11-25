@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        default-filters:
+          - name: Cors
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"          # 推荐用这个代替 allowedOrigins
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600

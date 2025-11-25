@@ -37,6 +37,7 @@
         <aop.version>3.5.7</aop.version>
         <redisson.version>3.32.0</redisson.version>
         <minio.version>8.5.17</minio.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
@@ -169,6 +170,14 @@
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>${minio.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>
