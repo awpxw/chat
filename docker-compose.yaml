@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-  # MySQL
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -13,10 +12,8 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+      - /data/service/mysql:/var/lib/mysql
 
-  # Redis
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -24,10 +21,9 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - /data/service/redis:/data
     command: redis-server --save 60 1 --appendonly yes --requirepass 123456
 
-  # MinIO（只暴露 API，不开控制台）
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -38,26 +34,30 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - minio-data:/data
+      - /data/service/minio:/data
     command: server /data
 
-  # Nacos 单机
   nacos:
-    image: nacos/nacos-server:v2.3.2
+    image: nacos-registry.cn-hangzhou.cr.aliyuncs.com/nacos/nacos-server:v2.3.2   # 稳到飞起
     container_name: nacos
     restart: unless-stopped
     environment:
       MODE: standalone
     ports:
       - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - /data/service/nacos/logs:/home/nacos/logs
 
-  # Kafka + Zookeeper（纯后端）
+  # Kafka 全家桶（一个都不许少！）
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     container_name: zookeeper
     restart: unless-stopped
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -73,8 +73,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    volumes:
+      - /data/service/kafka:/var/lib/kafka/data
 
-  # Prometheus（纯后端）
+  # 监控（Grafana 保留 UI，其余纯后端）
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -82,10 +84,9 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
+      - /data/service/prometheus:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml   # 你自己有配置就放这里
 
-  # Grafana（唯一保留 UI，用于看监控图表）
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -93,30 +94,20 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana-data:/var/lib/grafana
+      - /data/service/grafana:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin123
 
-  # ClickHouse（纯后端）
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse
     restart: unless-stopped
     ports:
-      - "8123:8123"
-      - "9000:9000"
+      - "8123:8123"      # HTTP 端口，保留（前端、驱动都用这个）
+      - "9001:9000"      # ← 改成这样！宿主机 9001 → 容器内 9000
     volumes:
-      - clickhouse-data:/var/lib/clickhouse
+      - /data/service/clickhouse:/var/lib/clickhouse
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
-
-volumes:
-  mysql-data:
-  redis-data:
-  minio-data:
-  prometheus-data:
-  grafana-data:
-  clickhouse-data:
