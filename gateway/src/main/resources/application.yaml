@@ -17,3 +17,8 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
+
+jwt:
+  secret: bztchat2025thisisaverylongsecretkey1234567890abcdef   # 随便写，越长越好
+  access-expire: 7200     # 2小时（秒）
+  refresh-expire: 604800  # 7天（秒）
