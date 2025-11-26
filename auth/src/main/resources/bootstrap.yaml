@@ -17,9 +17,10 @@ spring:
         username: nacos
         password: nacos
         file-extension: yaml
-        namespace: ${spring.profiles.active}
+        namespace: 47bc373d-81e6-4dac-b494-45132a4d88d4
         group: DEFAULT_GROUP
         refresh-enabled: true
         shared-configs:
           - data-id: common.yaml
+            group: DEFAULT_GROUP
             refresh: true

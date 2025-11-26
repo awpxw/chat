@@ -41,6 +41,7 @@
         <springdoc.version>2.6.0</springdoc.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
+        <mysql.verison>8.3.0</mysql.verison>
     </properties>
 
     <dependencyManagement>
@@ -102,7 +103,7 @@
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
-                <scope>runtime</scope>
+                <version>${mysql.verison}</version>
             </dependency>
 
             <dependency>
