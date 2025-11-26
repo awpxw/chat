@@ -194,15 +194,29 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.3.2</version>   <!-- 3.3.2 是最后一个完美支持 JDK8 的版本！ -->
+                <version>3.3.2</version>
                 <configuration>
+                    <!-- 关键：只有包含 spring-boot-starter 的模块才构建镜像 -->
+                    <skip>${jib.skip}</skip>
                     <from>
-                        <image>eclipse-temurin:8-jdk-alpine</image> <!-- 官方推荐的 JDK8 基础镜像 -->
+                        <image>eclipse-temurin:8-jdk-alpine</image>
                     </from>
                     <to>
                         <image>${docker.registry}/chat-${project.artifactId}</image>
                     </to>
                 </configuration>
+                <!-- 只有打包类型是 jar 且依赖了 spring-boot-starter 的才启用 Jib -->
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${maven.jib.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
