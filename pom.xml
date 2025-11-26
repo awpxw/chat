@@ -42,6 +42,8 @@
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
+        <jib.skip>false</jib.skip>
+        <docker.registry>aw</docker.registry>
     </properties>
 
     <dependencyManagement>
@@ -213,7 +215,7 @@
                             <goal>build</goal>
                         </goals>
                         <configuration>
-                            <skip>${maven.jib.skip}</skip>
+                            <skip>${jib.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
