@@ -15,7 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 跳过 common 模块的 Jib 构建 -->
-        <maven.jib.skip>true</maven.jib.skip>
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencies>
