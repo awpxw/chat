@@ -1,0 +1,79 @@
+# .github/workflows/deploy.yml
+name: CI/CD - Jib 零 Dockerfile 自动发布
+
+on:
+  push:
+    branches: [ main, dev, feature/* ]
+    paths:
+      - '**/pom.xml'
+      - '**/*.java'
+      - '**/*.yml'
+      - '**/*.yaml'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.detect.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 检测改动模块（自动忽略 common/.github）
+        id: detect
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | cut -d/ -f1 | sort -u | grep -vE '^\.github$|^common$|^$' | tr '\n' ',' | sed 's/,$//')
+          if [ -z "$CHANGED" ]; then
+            echo "无服务模块改动，跳过构建"
+            echo "changed=none" >> $GITHUB_OUTPUT
+          else
+            echo "检测到改动模块: $CHANGED"
+            echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.changed != 'none' && needs.detect-changes.outputs.changed != ''
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: ${{ split(needs.detect-changes.outputs.changed, ',') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Maven 缓存（第二次构建只要 10 秒）
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: 登录 Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERUSERNAME }}
+          password: ${{ secrets.DOCKERTOKEN }}   # 必须是 Access Token
+
+      - name: Jib 构建并推镜像（零 Dockerfile！）
+        run: |
+          echo "正在发布服务: ${{ matrix.module }}"
+          mvn -B compile jib:build \
+            -pl ${{ matrix.module }} -am -DskipTests \
+            -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
+            -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }}
+        env:
+          GIT_COMMIT_ID_ABBREV: ${{ github.sha }}
+          GIT_BRANCH: ${{ github.ref_name }}
+
+      - name: 发布成功！
+        run: |
+          echo "镜像已推送到 Docker Hub"
+          echo "https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }}"
