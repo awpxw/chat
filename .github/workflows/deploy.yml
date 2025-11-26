@@ -1,4 +1,4 @@
-# .github/workflows/deploy.yml
+# .github/workflows/deploy.yml   ← 完全兼容版（已解决 split 报错）
 name: CI/CD - Jib 零 Dockerfile 自动发布
 
 on:
@@ -20,26 +20,31 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: 检测改动模块（自动忽略 common/.github）
+      - name: 检测改动模块（兼容所有环境）
         id: detect
         run: |
+          # 兼容写法：用 jq 把逗号分隔的字符串转成 JSON 数组
           CHANGED=$(git diff --name-only HEAD~1 HEAD | cut -d/ -f1 | sort -u | grep -vE '^\.github$|^common$|^$' | tr '\n' ',' | sed 's/,$//')
           if [ -z "$CHANGED" ]; then
             echo "无服务模块改动，跳过构建"
             echo "changed=none" >> $GITHUB_OUTPUT
+            echo "matrix=[]" >> $GITHUB_OUTPUT
           else
             echo "检测到改动模块: $CHANGED"
             echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+            # 转成 GitHub matrix 能识别的 JSON 格式
+            MATRIX=$(echo "$CHANGED" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
+            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
   build-and-push:
     needs: detect-changes
     if: needs.detect-changes.outputs.changed != 'none' && needs.detect-changes.outputs.changed != ''
     runs-on: ubuntu-latest
+    needs: detect-changes
     strategy:
       matrix:
-        module: ${{ split(needs.detect-changes.outputs.changed, ',') }}
-
+        module: ${{ fromJson(needs.detect-changes.outputs.matrix) }}   # 兼容写法！
     steps:
       - uses: actions/checkout@v4
 
@@ -49,7 +54,7 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: Maven 缓存（第二次构建只要 10 秒）
+      - name: Maven 缓存
         uses: actions/cache@v4
         with:
           path: ~/.m2
@@ -59,8 +64,8 @@ jobs:
       - name: 登录 Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERUSERNAME }}
-          password: ${{ secrets.DOCKERTOKEN }}   # 必须是 Access Token
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Jib 构建并推镜像（零 Dockerfile！）
         run: |
@@ -69,9 +74,6 @@ jobs:
             -pl ${{ matrix.module }} -am -DskipTests \
             -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }}
-        env:
-          GIT_COMMIT_ID_ABBREV: ${{ github.sha }}
-          GIT_BRANCH: ${{ github.ref_name }}
 
       - name: 发布成功！
         run: |
