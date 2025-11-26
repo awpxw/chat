@@ -1,8 +1,9 @@
-name: CI/CD - Jib 零 Dockerfile 自动发布
+# .github/workflows/deploy.yml
+name: CI/CD - Jib 发布（JDK8 完美适配）
 
 on:
   push:
-    branches: [ main, dev, feature/* ]
+    branches: [ main, dev ]
     paths:
       - '**/pom.xml'
       - '**/*.java'
@@ -10,7 +11,6 @@ on:
       - '**/*.yaml'
 
 jobs:
-  # 第一步：检测改动了哪些模块
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -21,11 +21,10 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: 检测改动模块（完美兼容所有 GitHub 环境）
+      - name: 检测改动模块
         id: detect
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "" | cut -d/ -f1 | sort -u | grep -vE '^\.github$|^common$|^$' | tr '\n' ',' | sed 's/,$//')
-          
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | cut -d/ -f1 | sort -u | grep -vE '^\.github$|^common$|^$' | paste -sd, -)
           if [ -z "$CHANGED" ]; then
             echo "无服务模块改动，跳过构建"
             echo "changed=none" >> $GITHUB_OUTPUT
@@ -33,15 +32,13 @@ jobs:
           else
             echo "检测到改动模块: $CHANGED"
             echo "changed=$CHANGED" >> $GITHUB_OUTPUT
-            # 转成 GitHub matrix 能识别的 JSON 数组
             MATRIX=$(echo "$CHANGED" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
             echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
-  # 第二步：真正构建并推镜像
   build-and-push:
     needs: detect-changes
-    if: needs.detect-changes.outputs.changed != 'none' && needs.detect-changes.outputs.changed != ''
+    if: needs.detect-changes.outputs.changed != 'none'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,13 +46,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 设置 JDK 17
+      - name: 设置 JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 8
           distribution: temurin
 
-      - name: Maven 依赖缓存（第二次构建只要 10 秒）
+      - name: Maven 缓存
         uses: actions/cache@v4
         with:
           path: ~/.m2
@@ -65,18 +62,15 @@ jobs:
       - name: 登录 Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}   # 必须是 Access Token
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}   # 必须是 Access Token！
 
-      - name: Jib 一键构建并推送镜像（零 Dockerfile！）
+      - name: Jib 构建并推镜像（JDK8 完美支持）
         run: |
           echo "正在发布服务: ${{ matrix.module }}"
-          mvn -B compile jib:build \
-            -pl ${{ matrix.module }} -am -DskipTests \
+          mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
             -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }}
 
-      - name: 发布成功！
-        run: |
-          echo "镜像已推送到 Docker Hub"
-          echo "https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }}"
+      - name: 发布成功
+        run: echo "镜像已推送到 https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }}"
