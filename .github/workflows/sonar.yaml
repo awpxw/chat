@@ -17,8 +17,8 @@ jobs:
         with:
           # 关键：加上这 2 行！！
           args: >
-            -D sonar.projectKey=Jacky-org
-            -D sonar.organization=Jacky-org
+            -D sonar.projectKey=jacky-org
+            -D sonar.organization=jacky-org
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
