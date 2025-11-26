@@ -37,7 +37,7 @@
         <aop.version>3.5.7</aop.version>
         <redisson.version>3.32.0</redisson.version>
         <minio.version>8.5.17</minio.version>
-        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <spring-cloud.version>2021.0.6.2</spring-cloud.version>
         <springdoc.version>2.6.0</springdoc.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
@@ -55,28 +55,25 @@
             </dependency>
 
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
-            <!-- MyBatis-Plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
-            <!-- Hutool 工具包 -->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
             </dependency>
 
-            <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -84,35 +81,30 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- Fastjson2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
 
-            <!-- Caffeine 本地缓存 -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
             </dependency>
 
-            <!-- Jackson（处理 LocalDateTime） -->
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
-            <!-- 常见数据库驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- JWT 三件套（最新版） -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
@@ -158,23 +150,16 @@
             </dependency>
 
             <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-                <version>${spring-cloud.version}</version>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-bootstrap</artifactId>
+                <version>3.1.5</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-                <version>${spring-cloud.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <!-- 所有子模块继承的公共插件 -->
     <build>
         <plugins>
-            <!-- 编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -185,8 +170,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
-            <!-- Spring Boot 插件 -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -209,6 +192,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
