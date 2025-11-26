@@ -1,9 +1,8 @@
 package com.aw.filter;
 
 import com.aw.trace.TraceIdUtil;
-import jakarta.servlet.*;
 import org.springframework.stereotype.Component;
-
+import javax.servlet.*;
 import java.io.IOException;
 import java.util.UUID;
 

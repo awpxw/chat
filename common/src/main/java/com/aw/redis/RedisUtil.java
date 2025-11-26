@@ -78,7 +78,7 @@ public class RedisUtil {
     // ==================== JSON 序列化 ====================
     private <T> String toJson(T value) {
         if (value == null) return null;
-        if (value instanceof String str) return str;
+        if (value instanceof String ) return (String) value;
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {

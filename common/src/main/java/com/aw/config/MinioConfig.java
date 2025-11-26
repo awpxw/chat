@@ -3,10 +3,10 @@ package com.aw.config;
 
 import com.aw.minio.MinioProperties;
 import io.minio.MinioClient;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import javax.annotation.Resource;
 
 @Configuration
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package com.aw.filter;
 
 import com.aw.jwt.JwtUtil;           // ← 直接用你 common 里的
-import jakarta.annotation.Resource;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -14,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Set;
 

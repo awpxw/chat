@@ -3,7 +3,6 @@ package com.aw.limit;
 
 import com.aw.trace.BizException;
 import com.aw.utils.RequestIdUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.Objects;
 
 @Slf4j
 @Aspect
@@ -65,20 +66,29 @@ public class AccessLimitAspect {
 
     private String getLimitKey(HttpServletRequest request, AccessLimit accessLimit) {
         String prefix = "limit:" + request.getRequestURI();
+        String key;
 
-        return switch (accessLimit.limitType()) {
-            case IP -> prefix + ":" + getIp(request);
-            case USER -> {
-                String userId = (String) request.getAttribute("userId"); // 假设你登录后放这里了
-                yield prefix + ":user:" + (userId != null ? userId : "anonymous");
-            }
-            case CUSTOM -> {
-                if (accessLimit.key().isBlank()) {
+        switch (accessLimit.limitType()) {
+            case IP:
+                key = prefix + ":" + getIp(request);
+                break;
+
+            case USER:
+                String userId = (String) request.getAttribute("userId");
+                key = prefix + ":user:" + (userId != null ? userId : "anonymous");
+                break;
+
+            case CUSTOM:
+                if (Objects.equals(accessLimit.key(), "")) {
                     throw new IllegalArgumentException("自定义限流 key 不能为空");
                 }
-                yield prefix + ":" + accessLimit.key();
-            }
-        };
+                key = prefix + ":" + accessLimit.key();
+                break;
+            // 可选：加上 default，防止以后新增枚举报错
+            default:
+                throw new IllegalArgumentException("不支持的限流类型: " + accessLimit.limitType());
+        }
+        return key;
     }
 
     private String getIp(HttpServletRequest request) {

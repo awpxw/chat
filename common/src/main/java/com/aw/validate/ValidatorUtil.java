@@ -1,10 +1,12 @@
 package com.aw.validate;
 
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.springframework.util.CollectionUtils;
+
 
 import java.util.Collection;
 import java.util.Collections;
@@ -61,8 +63,8 @@ public class ValidatorUtil {
         if (obj == null) {
             throw new IllegalArgumentException("校验对象不能为空");
         }
-        if (obj instanceof Collection<?> coll) {
-            validateCollection((Collection<?>) coll);
+        if (obj instanceof Collection<?>) {
+            validateCollection((Collection<?>) obj);
         } else if (obj.getClass().isArray()) {
             validateArray((Object[]) obj);
         } else {

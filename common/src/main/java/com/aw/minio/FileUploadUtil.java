@@ -3,16 +3,18 @@ package com.aw.minio;
 
 
 import io.minio.*;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -68,7 +70,7 @@ public class FileUploadUtil {
      */
     public String getFileUrl(String fileName) {
         String domain = properties.getDomain();
-        if (domain != null && !domain.isBlank()) {
+        if (StringUtils.isNotBlank(domain)) {
             return domain.replaceAll("/+$", "") + "/" + fileName;
         }
         return properties.getEndpoint().replaceAll("/+$", "") + "/" + properties.getBucketName() + "/" + fileName;
@@ -107,23 +109,22 @@ public class FileUploadUtil {
     }
 
     private String createPublicPolicy() {
-        return """
-                {
-                  "Version": "2012-10-17",
-                  "Statement": [
-                    {
-                      "Effect": "Allow",
-                      "Principal": {"AWS": ["*"]},
-                      "Action": ["s3:GetObject"],
-                      "Resource": ["arn:aws:s3:::%s/*"]
-                    }
-                  ]
-                }
-                """.formatted(properties.getBucketName());
+        String bucketName = properties.getBucketName();
+        return "{\n" +
+                "  \"Version\": \"2012-10-17\",\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Principal\": {\"AWS\": [\"*\"]},\n" +
+                "      \"Action\": [\"s3:GetObject\"],\n" +
+                "      \"Resource\": [\"arn:aws:s3:::" + bucketName + "/*\"]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
     private String getFileSuffix(String originalFilename) {
-        if (originalFilename == null || originalFilename.isBlank()) {
+        if (originalFilename == null || Objects.equals(originalFilename, "")) {
             return ".tmp";
         }
         int dotIndex = originalFilename.lastIndexOf('.');
