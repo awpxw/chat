@@ -14,6 +14,11 @@ jobs:
           fetch-depth: 0
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        with:
+          # 关键：加上这 2 行！！
+          args: >
+            -D sonar.projectKey=jacky-org
+            -D sonar.organization=jacky-org
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
