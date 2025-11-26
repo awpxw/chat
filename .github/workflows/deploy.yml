@@ -68,7 +68,7 @@ jobs:
       - name: Jib 构建并推镜像（JDK8 完美支持）
         run: |
           echo "正在发布服务: ${{ matrix.module }}"
-          mvn -B compile jib:build -pl ${{ matrix.module }} -amd -DskipTests \
+          mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
             -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }}
 
