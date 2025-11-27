@@ -203,6 +203,9 @@
                     <from>
                         <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
+                    <to>
+                        <image>19514700698/chat-auth</image>   <!-- 写死你真实用户名+任意模块 -->
+                    </to>
                 </configuration>
                 <!-- 只有打包类型是 jar 且依赖了 spring-boot-starter 的才启用 Jib -->
                 <executions>
