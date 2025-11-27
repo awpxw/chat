@@ -70,12 +70,11 @@ jobs:
           JIB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "发布模块: ${{ matrix.module }} → $JIB_USERNAME/chat-${{ matrix.module }}"
-          mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
+          mvn -B jib:build -pl ${{ matrix.module }} -am -DskipTests \
             -Dimage=$JIB_USERNAME/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }} \
             -Djib.to.auth.username=$JIB_USERNAME \
-            -Djib.to.auth.password=$JIB_PASSWORD \
-            -Djib.skip=false  # 强制启用 Jib
+            -Djib.to.auth.password=$JIB_PASSWORD
 
       # SonarCloud 分析（用最新最强插件，无需指定版本）
       - name: SonarCloud 分析
