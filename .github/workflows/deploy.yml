@@ -63,7 +63,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
 
       # ==================== Jib 推送（只在 push 时执行）====================
-      - name: Jib 构建并推镜像（终极无敌版）
+      - name: Jib 构建并推镜像
         if: github.event_name == 'push' && matrix.module != '__all__'
         env:
           JIB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -78,21 +78,20 @@ jobs:
             -X
 
       # ==================== SonarCloud 分析（核心）====================
+      # SonarCloud 分析（强制使用 Java 8 兼容版本）
       - name: SonarCloud 分析
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           if [ "${{ matrix.module }}" != "__all__" ]; then
-            # 改动了的模块：只扫这些模块
             mvn -B verify -DskipTests \
-              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1:sonar \
               -pl ${{ matrix.module }} -am \
               -Dsonar.projectKey=chat-on-line_chat \
               -Dsonar.organization=chat-on-line
           else
-            # PR 或全量情况：扫整个项目
             mvn -B verify -DskipTests \
-              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1:sonar \
               -Dsonar.projectKey=chat-on-line_chat \
               -Dsonar.organization=chat-on-line
           fi
