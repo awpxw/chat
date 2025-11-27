@@ -1,4 +1,4 @@
-name: CI/CD + SonarCloud（质量门禁前置）
+name: CI/CD + SonarCloud
 
 on:
   push:
@@ -7,60 +7,51 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  sonarcloud:
+  ci-cd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: 设置 JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
+
       - name: Maven 缓存
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-      - name: SonarCloud 分析
+
+      - name: 构建、代码质量检查、打包
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          # 一条命令完成所有操作：清理、编译、测试、打包、代码质量检查
+          mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=chat-on-line_chat \
             -Dsonar.organization=chat-on-line
 
-  build-and-push:
-    needs: sonarcloud
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module: [auth, gateway, admin, message, customer]
-    steps:
-      - uses: actions/checkout@v4
-      - name: 设置 JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-      - name: 构建并推送镜像
+      - name: 推送所有服务镜像
+        if: github.event_name == 'push'
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker buildx create --use --name builder || true
-          docker buildx build \
-            --platform linux/amd64 \
-            --build-arg MODULE=${{ matrix.module }} \
-            -t $DOCKER_USERNAME/chat-${{ matrix.module }}:latest \
-            -t $DOCKER_USERNAME/chat-${{ matrix.module }}:${{ github.sha }} \
-            --push \
-            -f Dockerfile .
-      - name: 防止假红
-        if: always()
-        run: echo "镜像构建完成"
-
-
+          
+          # 为每个模块构建镜像
+          for module in auth gateway admin message customer; do
+            echo "构建镜像: chat-$module"
+            docker buildx build \
+              --platform linux/amd64 \
+              --build-arg MODULE=$module \
+              -t $DOCKER_USERNAME/chat-$module:latest \
+              -t $DOCKER_USERNAME/chat-$module:${{ github.sha }} \
+              --push \
+              -f Dockerfile .
+          done
