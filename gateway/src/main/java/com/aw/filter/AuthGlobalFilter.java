@@ -1,8 +1,6 @@
 package com.aw.filter;
 
-import com.aw.jwt.JwtUtil;           // ← 直接用你 common 里的
-
-
+import com.aw.jwt.JwtUtil;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

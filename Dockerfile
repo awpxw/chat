@@ -5,7 +5,7 @@ COPY . .
 ARG MODULE
 # 终极无敌编译命令（永别依赖找不到）
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -U -pl $MODULE -amd clean package -DskipTests
+    mvn -B -U -T 1C -pl $MODULE -amd clean install -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
