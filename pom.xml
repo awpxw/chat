@@ -202,8 +202,7 @@
                     <from>
                         <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
-                    <!-- 关键：必须放在这里！不能放在 execution 里 -->
-                    <containerize>${project.build.directory}/BOOT-INF</containerize>
+                    <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
                 </configuration>
                 <executions>
                     <execution>
@@ -211,9 +210,6 @@
                         <goals>
                             <goal>build</goal>
                         </goals>
-                        <configuration>
-                            <skip>${jib.skip}</skip>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
