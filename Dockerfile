@@ -2,9 +2,11 @@ FROM maven:3.9.1-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY . .
 
-# 终极核弹：全量编译一次搞定所有依赖
+ARG MODULE
+# 终极核弹：先强制 install common（关键！），再编译当前模块
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -U -T 1C clean install -DskipTests
+    mvn -B -U clean install -pl common -am -DskipTests && \
+    mvn -B -U clean install -pl $MODULE -am -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
