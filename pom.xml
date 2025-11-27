@@ -203,7 +203,7 @@
                         <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
                     <to>
-                        <image>19514700698/chat-placeholder</image>
+                        <image>19514700698/chat-auth</image>  <!-- 改成你已存在的任意仓库 -->
                     </to>
                     <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
                 </configuration>
