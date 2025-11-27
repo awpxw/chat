@@ -12,7 +12,7 @@ public class AuthStart
     }
     public class TestSonar {
         public void bug() {
-            String s = null;
+            String s = "1";
             s.length(); // 故意空指针！Sonar 一定会报 Bug
         }
     }
