@@ -1,16 +1,14 @@
-# .github/workflows/deploy.yml
-name: CI/CD - Jib 发布（JDK8 完美适配）
+# .github/workflows/ci-cd.yml   （建议改个名字，一目了然）
+name: CI/CD + SonarCloud
 
 on:
   push:
-    branches: [ main, dev ]
-    paths:
-      - '**/pom.xml'
-      - '**/*.java'
-      - '**/*.yml'
-      - '**/*.yaml'
+    branches: [ main, dev, release/* ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
+  # 第一步：检测哪些模块改动了（你原来的逻辑完全保留）
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -36,15 +34,24 @@ jobs:
             echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
-  build-and-push:
+  # 第二步：真正干活（编译 + SonarCloud 分析 + Jib 推送）
+  build-analyze-push:
     needs: detect-changes
-    if: needs.detect-changes.outputs.changed != 'none'
+    if: needs.detect-changes.outputs.changed != 'none' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+        # PR 时强制扫描全量，push 时只扫改动的模块
+        module: ${{ fromJson(needs.detect-changes.outputs.matrix || '[]') }}
+        include:
+          # 如果是 PR 或者 matrix 为空（比如只改了 pom.xml），就加一个全量扫描任务
+          - module: ''
+            full-scan: true
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # SonarCloud 必须完整历史
 
       - name: 设置 JDK 8
         uses: actions/setup-java@v4
@@ -59,18 +66,43 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2-
 
+      # ======== 登录 Docker Hub（只在 push 时需要）========
       - name: 登录 Docker Hub
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}   # 必须是 Access Token！
+          password: ${{ secrets.DOCKER_PASSWORD }}   # 必须是带 Write 权限的 Access Token
 
-      - name: Jib 构建并推镜像（JDK8 完美支持）
+      # ======== 编译 + Jib 推送（只在 push 且有具体模块时执行）========
+      - name: Jib 构建并推镜像
+        if: github.event_name == 'push' && matrix.module != ''
         run: |
           echo "正在发布服务: ${{ matrix.module }}"
           mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
             -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }}
 
-      - name: 发布成功
+      # ======== SonarCloud 分析（核心）========
+      - name: SonarCloud 分析
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ "${{ matrix.module }}" != "" ]; then
+            # 改动模块：只扫这个模块
+            mvn -B verify -DskipTests \
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              -pl ${{ matrix.module }} -am \
+              -Dsonar.projectKey=jacky-org_chat \
+              -Dsonar.organization=jacky-org
+          else
+            # PR 或全量情况：扫整个项目
+            mvn -B verify -DskipTests \
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              -Dsonar.projectKey=jacky-org_chat \
+              -Dsonar.organization=jacky-org
+          fi
+
+      - name: 发布成功提示
+        if: github.event_name == 'push' && matrix.module != ''
         run: echo "镜像已推送到 https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }}"
