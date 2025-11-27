@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "发布模块: ${{ matrix.module }} → $JIB_USERNAME/chat-${{ matrix.module }}"
           mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
-            -Djib.target.image=$JIB_USERNAME/chat-${{ matrix.module }} \
+            -Dimage=$JIB_USERNAME/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }} \
             -Djib.to.auth.username=$JIB_USERNAME \
             -Djib.to.auth.password=$JIB_PASSWORD
