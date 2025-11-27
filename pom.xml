@@ -39,7 +39,6 @@
         <minio.version>8.5.17</minio.version>
         <spring-cloud.version>2021.0.6.2</spring-cloud.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
         <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
