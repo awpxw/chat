@@ -44,6 +44,7 @@
         <mysql.verison>8.3.0</mysql.verison>
         <jib.skip>false</jib.skip>
         <docker.registry>aw</docker.registry>
+        <sonar.organization>chat-on-line</sonar.organization>
     </properties>
 
     <dependencyManagement>
@@ -226,11 +227,15 @@
                 <version>0.8.12</version>
                 <executions>
                     <execution>
-                        <goals><goal>prepare-agent</goal></goals>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>check</id>
-                        <goals><goal>check</goal></goals>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                         <configuration>
                             <rules>
                                 <rule>
