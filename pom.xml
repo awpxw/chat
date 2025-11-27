@@ -17,8 +17,8 @@
 
     <!-- 统一编码 & 编译版本 -->
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,9 +39,10 @@
         <minio.version>8.5.17</minio.version>
         <spring-cloud.version>2021.0.6.2</spring-cloud.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
+        <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
     </properties>
 
     <dependencyManagement>
@@ -189,6 +190,9 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <skip>${spring-boot.repackage.skip}</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

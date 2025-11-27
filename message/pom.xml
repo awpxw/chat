@@ -11,10 +11,11 @@
     <packaging>jar</packaging>
 
     <name>message</name>
-    <url>http://maven.apache.org</url>
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
     </properties>
 
     <dependencies>
