@@ -10,10 +10,4 @@ public class AuthStart
 
         SpringApplication.run(AuthStart.class, args);
     }
-    public class TestSonar {
-        public void bug() {
-            String s = "1";
-            s.length(); // 故意空指针！Sonar 一定会报 Bug
-        }
-    }
 }
