@@ -63,15 +63,19 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
 
       # ==================== Jib 推送（只在 push 时执行）====================
-      - name: Jib 构建并推镜像（永别 401！最终修正版）
+      - name: Jib 构建并推镜像（终极无敌版）
         if: github.event_name == 'push' && matrix.module != '__all__'
+        env:
+          JIB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          JIB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "正在发布服务: ${{ matrix.module }}"
+          echo "发布模块: ${{ matrix.module }} → $JIB_USERNAME/chat-${{ matrix.module }}"
           mvn -B compile jib:build -pl ${{ matrix.module }} -am -DskipTests \
-            -Djib.to.image=${{ secrets.DOCKER_USERNAME }}/chat-${{ matrix.module }} \
+            -Djib.to.image=$JIB_USERNAME/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }} \
-            -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
-            -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
+            -Djib.to.auth.username=$JIB_USERNAME \
+            -Djib.to.auth.password=$JIB_PASSWORD \
+            -X
 
       # ==================== SonarCloud 分析（核心）====================
       - name: SonarCloud 分析
