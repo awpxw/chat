@@ -63,7 +63,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
 
       # Jib 推送（只在 push 时执行）
-      - name: Jib 构建并推镜像（变量覆盖终极版）
+      - name: Jib 构建并推镜像
         if: github.event_name == 'push' && matrix.module != '__all__'
         env:
           JIB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -74,7 +74,8 @@ jobs:
             -Dimage=$JIB_USERNAME/chat-${{ matrix.module }} \
             -Djib.to.tags=latest,${{ github.sha }},${{ github.ref_name }} \
             -Djib.to.auth.username=$JIB_USERNAME \
-            -Djib.to.auth.password=$JIB_PASSWORD
+            -Djib.to.auth.password=$JIB_PASSWORD \
+            -Djib.skip=false  # 强制启用 Jib
 
       # SonarCloud 分析（用最新最强插件，无需指定版本）
       - name: SonarCloud 分析
