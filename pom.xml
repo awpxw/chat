@@ -167,8 +167,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.12.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -199,8 +199,9 @@
                 <configuration>
                     <!-- 关键：只有包含 spring-boot-starter 的模块才构建镜像 -->
                     <skip>${jib.skip}</skip>
+                    <!-- 推荐：最轻量，启动最快 -->
                     <from>
-                        <image>eclipse-temurin:8-jdk-alpine</image>
+                        <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
                     <to>
                         <image>${docker.registry}/chat-${project.artifactId}</image>
