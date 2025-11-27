@@ -202,6 +202,8 @@
                     <from>
                         <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
+                    <!-- 关键：必须放在这里！不能放在 execution 里 -->
+                    <containerize>${project.build.directory}/BOOT-INF</containerize>
                 </configuration>
                 <executions>
                     <execution>
@@ -211,8 +213,6 @@
                         </goals>
                         <configuration>
                             <skip>${jib.skip}</skip>
-                            <!-- 神级判断：只有 target 目录里存在 BOOT-INF 的模块才打镜像 -->
-                            <containerize>${project.build.directory}/BOOT-INF</containerize>
                         </configuration>
                     </execution>
                 </executions>
