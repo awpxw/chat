@@ -43,8 +43,6 @@
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
         <jib.skip>false</jib.skip>
-        <docker.registry>aw</docker.registry>
-        <sonar.organization>chat-on-line</sonar.organization>
     </properties>
 
     <dependencyManagement>
