@@ -2,10 +2,9 @@ FROM maven:3.9.1-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY . .
 
-ARG MODULE
-# 终极无敌编译命令（永别依赖找不到）
+# 终极核弹：全量编译一次搞定所有依赖
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -U -T 1C -pl $MODULE -amd clean install -DskipTests
+    mvn -B -U -T 1C clean install -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
