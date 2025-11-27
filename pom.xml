@@ -42,8 +42,6 @@
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
-        <jib.skip>false</jib.skip>
-        <jib.target.image>placeholder/chat-default</jib.target.image>  <!-- 默认占位 -->
     </properties>
 
     <dependencyManagement>
@@ -184,31 +182,12 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.3</version>
-                <configuration>
-                    <skip>${jib.skip}</skip>
-                    <from>
-                        <image>eclipse-temurin:17-jre-alpine</image>
-                    </from>
-                    <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
                         </goals>
                     </execution>
                 </executions>
