@@ -202,18 +202,17 @@
                     <from>
                         <image>eclipse-temurin:17-jre-alpine</image>
                     </from>
-                    <!-- 注释掉 <to> 标签，让命令行完全接管 -->
-                    <!--
-                    <to>
-                        <image>${jib.target.image}</image>
-                    </to>
-                    -->
+                    <containerize condition="spring-boot-starter">
+                        <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
+                    </containerize>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals><goal>build</goal></goals>
-                        <configuration><skip>${jib.skip}</skip></configuration>
+                        <configuration>
+                            <skip>${jib.skip}</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
