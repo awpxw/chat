@@ -5,6 +5,7 @@ package com.aw.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -16,11 +17,12 @@ import java.util.Map;
  * 所有项目引用 common 模块后，只需在 application.yml 配置 jwt.xxx 即可
  */
 @Component
+@Data
 public class JwtUtil {
 
     private final JwtProperties properties;
 
-    private SecretKey key;
+    public SecretKey key;
 
     public JwtUtil(JwtProperties properties) {
         this.properties = properties;

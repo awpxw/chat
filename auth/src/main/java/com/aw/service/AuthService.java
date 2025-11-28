@@ -10,4 +10,6 @@ public interface AuthService {
     void register(LoginDTO loginDTO);
 
     LoginVO refresh(LoginDTO loginVO);
+
+    LoginVO logout(LoginDTO loginDTO);
 }

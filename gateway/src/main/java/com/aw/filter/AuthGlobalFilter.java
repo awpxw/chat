@@ -1,19 +1,26 @@
 package com.aw.filter;
 
 import com.aw.jwt.JwtUtil;
+import com.aw.service.TokenBlacklistService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-import org.springframework.http.HttpCookie;
+
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -23,10 +30,13 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
     @Resource
     private JwtUtil jwtUtil;   // 直接注入你 common 里的工具类
 
+    @Resource
+    private TokenBlacklistService tokenBlacklistService;
+
     // 白名单路径（不用登录）
     private static final Set<String> WHITE_LIST = Set.of(
-        "/user/login", "/user/register", "/user/captcha",
-        "/auth/refresh", "/v3/api-docs", "/swagger", "/webjars"
+            "/user/login", "/user/register", "/user/captcha",
+            "/auth/refresh", "/v3/api-docs", "/swagger", "/webjars"
     );
 
     private String getToken(ServerHttpRequest request) {
@@ -56,34 +66,45 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
         return -100; // 比跨域过滤器先执行
     }
 
+    @NotNull
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, @NotNull WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-        String path = request.getURI().getPath();
+        String path = request.getPath().value(); // 注意：getPath().value() 才是字符串
 
         // 1. 白名单直接放行
-        if (WHITE_LIST.stream().anyMatch(path::contains)) {
+        if (WHITE_LIST.stream().anyMatch(path::startsWith)) { // 改成 startsWith 更准！
             return chain.filter(exchange);
         }
 
         // 2. 获取 token
         String token = getToken(request);
-        if (token == null || token.isBlank()) {
-            return unAuth(exchange, "缺失AccessToken");
+        if (Objects.isNull(token) || Objects.equals(token, "")) {
+            return unAuth(exchange, "缺失 AccessToken");
         }
 
-        // 3. 校验 token（直接用你 common 里的方法）
-        if (!jwtUtil.validateToken(token)) {
-            return unAuth(exchange, "无效或已过期Token");
+        // 3. 解析 + 校验 token（只解析一次！避免重复解析）
+        try {
+            jwtUtil.validateToken(token); // 推荐你工具类加个 parseToken 返回 Claims
+        } catch (JwtException e) {
+            return unAuth(exchange, "无效的 Token");
         }
 
-        // 4. 校验通过 → 把用户信息塞到 header 传给下游微服务
+        // 4. 黑名单校验（关键！）
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            return unAuth(exchange, "Token 已失效，请重新登录");
+        }
+
+        // 5. 校验通过 → 把用户信息塞到 header
+        Claims claims = jwtUtil.parseToken(token);
         Long userId = jwtUtil.getUserId(token);
         String username = jwtUtil.getUsername(token);
+        String role = claims.get("role", String.class);
 
-        ServerHttpRequest newRequest = request.mutate()
+        ServerHttpRequest newRequest = exchange.getRequest().mutate()
                 .header("x-user-id", String.valueOf(userId))
-                .header("x-username", username == null ? "" : username)
+                .header("x-username", StringUtils.hasText(username) ? username : "")
+                .header("x-role", StringUtils.hasText(role) ? role : "")
                 .build();
 
         return chain.filter(exchange.mutate().request(newRequest).build());
