@@ -1,4 +1,4 @@
-package com.aw.trace;
+package com.aw.exception;
 
 import lombok.Getter;
 

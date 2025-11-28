@@ -1,5 +1,6 @@
-package com.aw.trace;
+package com.aw.exception;
 
+import com.aw.trace.TraceIdUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -22,8 +22,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.7.6</spring-boot.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <hutool.version>5.8.28</hutool.version>
         <lombok.version>1.18.34</lombok.version>
         <fastjson2.version>2.0.52</fastjson2.version>
@@ -35,7 +35,7 @@
         <test.version>4.0.0</test.version>
         <velocity.version>2.3</velocity.version>
         <aop.version>3.5.7</aop.version>
-        <redisson.version>3.32.0</redisson.version>
+        <redisson.version>3.52.0</redisson.version>
         <minio.version>8.5.17</minio.version>
         <spring-cloud.version>2021.0.6.2</spring-cloud.version>
         <springdoc.version>2.6.0</springdoc.version>
@@ -65,7 +65,7 @@
 
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
