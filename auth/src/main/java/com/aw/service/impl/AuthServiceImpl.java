@@ -96,6 +96,11 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public LoginVO logout(LoginDTO loginDTO) {
+        return null;
+    }
+
     private String generateAccessTokenByUserInfo(User user) {
         return jwtUtil.generateAccessToken(user.getId(), user.getName(), null);
     }

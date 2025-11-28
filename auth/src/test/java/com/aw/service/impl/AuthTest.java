@@ -160,7 +160,7 @@ class AuthTest {
     @Test
     void refresh_token_expired() {
         LoginDTO loginDTO = new LoginDTO();
-        String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null,-1L);
+        String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
         loginDTO.setRefreshToken(accessTokenWithExpired);
         BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
@@ -169,8 +169,8 @@ class AuthTest {
     @Test
     void refresh_token_wrong() {
         LoginDTO loginDTO = new LoginDTO();
-        String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null,-1L);
-        loginDTO.setRefreshToken(accessTokenWithExpired+"///");
+        String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
+        loginDTO.setRefreshToken(accessTokenWithExpired + "///");
         BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }

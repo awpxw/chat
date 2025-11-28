@@ -42,5 +42,12 @@ public class AuthController {
         return Result.success(loginVO);
     }
 
+    @PostMapping("/logout")
+    public Result<LoginVO> logout(@RequestBody LoginDTO loginDTO) {
+        ValidatorUtil.validate(loginDTO, RefreshGroup.class);
+        LoginVO loginVO = authService.logout(loginDTO);
+        return Result.success(loginVO);
+    }
+
 
 }
