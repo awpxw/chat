@@ -1,8 +1,9 @@
 // common/src/main/java/com/aw/common/aspect/AccessLimitAspect.java
 package com.aw.limit;
 
-import com.aw.trace.BizException;
+import com.aw.exception.BizException;
 import com.aw.utils.RequestIdUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Objects;
 
