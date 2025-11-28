@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)  // 加这行！
-class AuthControllerIntegrationTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class AuthTest {
 
     @Autowired
     TestRestTemplate rest;
@@ -151,7 +151,8 @@ class AuthControllerIntegrationTest {
     @Test
     void refresh_token_success() {
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setRefreshToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzY0MzExMzE3LCJleHAiOjE3NjQzMTg1MTcsInVzZXJuYW1lIjoiYWRtaW4ifQ.nqytGq2aPzr8xovPLvvgAUv9gW5JK-Um17JrKyhlm2Y");
+        String refreshToken = jwtUtil.generateRefreshToken(1L);
+        loginDTO.setRefreshToken(refreshToken);
         ResponseEntity<String> response = rest.postForEntity("/api/auth/refresh", loginDTO, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }

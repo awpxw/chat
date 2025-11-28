@@ -74,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
         checkCaptchaExpireOrWrong(loginDTO);
 
         addNewUser(loginDTO);
+
     }
 
     @Override
@@ -83,9 +84,9 @@ public class AuthServiceImpl implements AuthService {
 
         Claims claims = jwtUtil.parseToken(loginDTO.getRefreshToken());
 
-        User user = findUser(claims.getId());
+        User user = findUser(claims.getSubject());
 
-        String accessToken =  generateAccessTokenByUserInfo(loginDTO,user);
+        String accessToken =  generateAccessTokenByUserInfo(user);
 
         LoginVO loginVO = new LoginVO();
 
@@ -95,12 +96,12 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
-    private String generateAccessTokenByUserInfo(LoginDTO loginDTO, User user) {
+    private String generateAccessTokenByUserInfo(User user) {
         return jwtUtil.generateAccessToken(user.getId(), user.getName(), null);
     }
 
     private User findUser(String id) {
-        return userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, id));
+        return userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, Long.parseLong(id)));
     }
 
     private void checkInvalid(LoginDTO loginDTO) {

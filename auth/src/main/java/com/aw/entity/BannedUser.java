@@ -23,4 +23,5 @@ public class BannedUser extends BaseEntity {
 
     /** 操作管理员ID */
     private Long operatorId;
+
 }

@@ -1,6 +1,7 @@
 package com.aw.filter;
 
 import com.aw.jwt.JwtUtil;
+import jakarta.annotation.Resource;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Set;
 
