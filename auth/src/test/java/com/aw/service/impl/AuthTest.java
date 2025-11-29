@@ -5,9 +5,7 @@ import com.aw.dto.LoginDTO;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.AuthService;
-import com.aw.vo.CaptchaVO;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +14,18 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.nacos.api.cmdb.pojo.PreservedEntityTypes.service;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ActiveProfiles("test")
 class AuthTest {
 
     @Autowired
@@ -42,7 +37,7 @@ class AuthTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @Autowired
+    @Resource
     private JwtUtil jwtUtil;
 
     @Test
@@ -208,7 +203,7 @@ class AuthTest {
     }
 
     @Test
-    void should_invalid_captcha_after_expiration(){
+    void should_invalid_captcha_after_expiration() {
         redisTemplate.opsForValue().set("captcha:0e596dd6bf4347c18dce6871e1cbdc7b", "1111", 1, TimeUnit.SECONDS);
         CaptchaDTO captchaDTO1 = new CaptchaDTO();
         captchaDTO1.setUuid("0e596dd6bf4347c18dce6871e1cbdc7b");
@@ -217,7 +212,57 @@ class AuthTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         String responseBody = new String(Objects.requireNonNull(responseEntity.getBody()), StandardCharsets.UTF_8);
         assertTrue(responseBody.contains("验证码失效"));
+    }
 
+    @Test
+    void change_password_success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzY0Mzk3NTcyLCJleHAiOjE3NjQ0MDQ3NzIsInVzZXJuYW1lIjoiYWRtaW4ifQ.7UUiIMCFpJkEdOOgmcyYgbHo5X2dRI-6k8r9BYYRGgI");
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setOldPassword("admin");
+        loginDTO.setPassword("newPassword");
+        HttpEntity<LoginDTO> entity = new HttpEntity<>(loginDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity(
+                "http://localhost:8080/api/auth/password/change",  // 直接走网关
+                entity,
+                String.class
+        );
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
+    @Test
+    void should_change_password_fail_without_login() {
+        HttpHeaders headers = new HttpHeaders();
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setOldPassword("oldPassword");
+        loginDTO.setPassword("newPassword");
+        HttpEntity<LoginDTO> entity = new HttpEntity<>(loginDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity(
+                "http://localhost:8080/api/auth/password/change",  // 直接走网关
+                entity,
+                String.class
+        );
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("\"message\":\"缺失 AccessToken\""));
+    }
+
+    @Test
+    void should_change_password_fail_without_active_token() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzY0Mzk3NTcyLCJleHAiOjE3NjQ0MDQ3NzIsInVzZXJuYW1lIjoiYWRtaW4ifQ.7UUiIMCFpJkEdOOgmcyYgbHo5X2dRI-6k8r9");
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setOldPassword("oldPassword");
+        loginDTO.setPassword("newPassword");
+        HttpEntity<LoginDTO> entity = new HttpEntity<>(loginDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity(
+                "http://localhost:8080/api/auth/password/change",  // 直接走网关
+                entity,
+                String.class
+        );
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("\"message\":\"无效的 Token\""));
     }
 
 }

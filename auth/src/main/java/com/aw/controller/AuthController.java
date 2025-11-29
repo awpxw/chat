@@ -12,13 +12,10 @@ import com.aw.validate.ValidatorUtil;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Resource
@@ -67,5 +64,13 @@ public class AuthController {
         return Result.success();
     }
 
+    @PostMapping("/password/change")
+    public Result<CaptchaVO> passwordChange(@RequestBody LoginDTO loginDTO,
+                                            @RequestHeader(value = "x-user-id", required = false) Integer userId,
+                                            @RequestHeader(value = "x-username", required = false) String username) {
+        ValidatorUtil.validate(loginDTO, ChangePasswordGroup.class);
+        authService.passwordChange(loginDTO,userId,username);
+        return Result.success();
+    }
 
 }

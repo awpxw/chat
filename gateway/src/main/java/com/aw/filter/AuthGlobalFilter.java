@@ -2,10 +2,8 @@ package com.aw.filter;
 
 import com.aw.jwt.JwtUtil;
 import com.aw.service.TokenBlacklistService;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Resource;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -28,23 +26,25 @@ import java.util.Set;
 public class AuthGlobalFilter implements WebFilter, Ordered {
 
     @Resource
-    private JwtUtil jwtUtil;   // 直接注入你 common 里的工具类
+    private JwtUtil jwtUtil;
 
     @Resource
     private TokenBlacklistService tokenBlacklistService;
 
-    // 白名单路径（不用登录）
     private static final Set<String> WHITE_LIST = Set.of(
-            "/user/login", "/user/register", "/user/captcha",
-            "/auth/refresh", "/v3/api-docs", "/swagger", "/webjars"
-    );
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh",
+            "/api/auth/logout",
+            "/api/auth/captcha",
+            "/api/auth/captcha/verify",
+            "/v3/api-docs");
 
     private String getToken(ServerHttpRequest request) {
         String auth = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (auth != null && auth.startsWith("Bearer ")) {
             return auth.substring(7);
         }
-        // 支持 cookie 方式（如果前端放 cookie）
         return request.getCookies()
                 .getOrDefault("access_token", Collections.emptyList())
                 .stream()
@@ -66,9 +66,8 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
         return -100; // 比跨域过滤器先执行
     }
 
-    @NotNull
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, @NotNull WebFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value(); // 注意：getPath().value() 才是字符串
 
@@ -84,9 +83,8 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
         }
 
         // 3. 解析 + 校验 token（只解析一次！避免重复解析）
-        try {
-            jwtUtil.validateToken(token); // 推荐你工具类加个 parseToken 返回 Claims
-        } catch (JwtException e) {
+        boolean isActive = jwtUtil.validateToken(token);
+        if (!isActive) {
             return unAuth(exchange, "无效的 Token");
         }
 
@@ -96,17 +94,16 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
         }
 
         // 5. 校验通过 → 把用户信息塞到 header
-        Claims claims = jwtUtil.parseToken(token);
         Long userId = jwtUtil.getUserId(token);
         String username = jwtUtil.getUsername(token);
-        String role = claims.get("role", String.class);
 
-        ServerHttpRequest newRequest = exchange.getRequest().mutate()
+        ServerHttpRequest newRequest = request.mutate()
                 .header("x-user-id", String.valueOf(userId))
                 .header("x-username", StringUtils.hasText(username) ? username : "")
-                .header("x-role", StringUtils.hasText(role) ? role : "")
                 .build();
 
+        // 关键！改成这行，100% 转发成功！
         return chain.filter(exchange.mutate().request(newRequest).build());
     }
+
 }

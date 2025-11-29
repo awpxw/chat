@@ -133,6 +133,17 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public void passwordChange(LoginDTO loginDTO, Integer userId, String username) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
+                .eq(User::getName, username)
+                .eq(User::getId, userId)
+                .eq(User::getPassword, loginDTO.getOldPassword());
+        User user = userMapper.selectOne(wrapper);
+        user.setPassword(loginDTO.getPassword());
+        userMapper.updateById(user);
+    }
+
     private Map<String, String> generateCaptcha(int expireIns) {
         return captchaUtils.generateCaptcha(expireIns);
     }
