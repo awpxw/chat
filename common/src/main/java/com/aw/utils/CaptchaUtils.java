@@ -1,5 +1,6 @@
 package com.aw.utils;
 
+import com.aw.exception.BizException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +8,13 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,34 +28,27 @@ public class CaptchaUtils {
     private static final int WIDTH = 160;      // 验证码宽度
     private static final int HEIGHT = 48;      // 验证码高度
     private static final int CODE_LENGTH = 4;  // 验证码位数
-    private static final int EXPIRE_MINUTES = 3; // 过期时间 3 分钟
+    private static final int EXPIRE_SECOND = 180; // 过期时间 3 分钟
     private static final String CHAR_POOL = "23456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
-
 
     public CaptchaUtils(@Autowired StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
+
     /**
      * 生成验证码图片并返回 uuid（前端存 cookie 或 localStorage）
      */
-    public String generateCaptcha(HttpServletResponse response) throws IOException {
+    public Map<String, String> generateCaptcha(int expireMinutes) {
+        HashMap<String, String> map = new HashMap<>();
         String uuid = UUID.randomUUID().toString().replace("-", "");
         String code = generateCode();
-
-        // 存入 Redis
         String redisKey = "captcha:" + uuid;
-        redisTemplate.opsForValue().set(redisKey, code.toLowerCase(), EXPIRE_MINUTES, TimeUnit.MINUTES);
-
-        // 生成图片
+        redisTemplate.opsForValue().set(redisKey, code.toLowerCase(), expireMinutes == -1 ? EXPIRE_SECOND : expireMinutes, TimeUnit.SECONDS);
         BufferedImage image = createImage(code);
-        response.setContentType("image/png");
-        response.setHeader("Cache-Control", "no-cache, no-store");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
-
-        ImageIO.write(image, "png", response.getOutputStream());
-        return uuid; // 前端需要把这个 uuid 传回登录接口
+        map.put("captchaId", redisKey);
+        map.put("image", image.toString());
+        return map;
     }
 
     /**
@@ -126,5 +121,14 @@ public class CaptchaUtils {
         int g = fc + random.nextInt(bc - fc);
         int b = fc + random.nextInt(bc - fc);
         return new Color(r, g, b);
+    }
+
+    /**
+     * 图片转base64
+     */
+    private String convertImageToBase64(BufferedImage image) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", stream);
+        return Base64.getEncoder().encodeToString(stream.toByteArray());
     }
 }

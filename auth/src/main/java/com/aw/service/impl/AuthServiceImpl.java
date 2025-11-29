@@ -1,6 +1,7 @@
 package com.aw.service.impl;
 
 import com.alibaba.nacos.common.utils.CollectionUtils;
+import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.entity.BannedUser;
 import com.aw.entity.User;
@@ -10,6 +11,7 @@ import com.aw.mapper.UserMapper;
 import com.aw.service.AuthService;
 import com.aw.exception.BizException;
 import com.aw.utils.CaptchaUtils;
+import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -17,11 +19,15 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -86,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = findUser(claims.getSubject());
 
-        String accessToken =  generateAccessTokenByUserInfo(user);
+        String accessToken = generateAccessTokenByUserInfo(user);
 
         LoginVO loginVO = new LoginVO();
 
@@ -99,6 +105,36 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginVO logout(LoginDTO loginDTO) {
         return null;
+    }
+
+    @Override
+    public CaptchaVO captcha(CaptchaDTO captchaDTO) {
+
+        Integer expireIns = captchaDTO.getExpireIns();
+
+        Map<String, String> map = generateCaptcha(expireIns);
+
+        CaptchaVO captchaVO = new CaptchaVO();
+
+        captchaVO.setCaptchaId(map.get("captchaId"));
+
+        captchaVO.setImage(map.get("image"));
+
+        return captchaVO;
+
+    }
+
+    @Override
+    public void captchaVerify(CaptchaDTO captchaDTO) {
+        String uuid = captchaDTO.getUuid();
+        String code = captchaDTO.getCode();
+        if (!captchaUtils.validate(uuid, code)) {
+            throw new BizException("验证码失效");
+        }
+    }
+
+    private Map<String, String> generateCaptcha(int expireIns) {
+        return captchaUtils.generateCaptcha(expireIns);
     }
 
     private String generateAccessTokenByUserInfo(User user) {
