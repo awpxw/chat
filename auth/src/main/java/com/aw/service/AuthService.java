@@ -1,6 +1,8 @@
 package com.aw.service;
 
+import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
 
 public interface AuthService {
@@ -12,4 +14,8 @@ public interface AuthService {
     LoginVO refresh(LoginDTO loginVO);
 
     LoginVO logout(LoginDTO loginDTO);
+
+    CaptchaVO captcha(CaptchaDTO captchaDTO);
+
+    void captchaVerify(CaptchaDTO captchaDTO);
 }

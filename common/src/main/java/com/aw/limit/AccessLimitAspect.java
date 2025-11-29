@@ -57,7 +57,7 @@ public class AccessLimitAspect {
             String.valueOf(accessLimit.seconds())
         );
 
-        if (result == null || result == 0) {
+        if (result == 0) {
             log.warn("接口限流触发 => key={}, method={}, ip={}, requestId={}",
                 key, request.getMethod(), getIp(request), RequestIdUtil.get());
             throw new BizException(10002, accessLimit.message());
@@ -74,7 +74,7 @@ public class AccessLimitAspect {
                 break;
 
             case USER:
-                String userId = (String) request.getAttribute("userId");
+                String userId = request.getHeader("X-User-Id");
                 key = prefix + ":user:" + (userId != null ? userId : "anonymous");
                 break;
 

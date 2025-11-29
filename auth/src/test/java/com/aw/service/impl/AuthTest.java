@@ -1,22 +1,32 @@
 package com.aw.service.impl;
 
+import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.AuthService;
+import com.aw.vo.CaptchaVO;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static com.alibaba.nacos.api.cmdb.pojo.PreservedEntityTypes.service;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -173,6 +183,41 @@ class AuthTest {
         loginDTO.setRefreshToken(accessTokenWithExpired + "///");
         BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
+    }
+
+    @Test
+    void captcha_success() {
+        CaptchaDTO captchaDTO = new CaptchaDTO();
+        ResponseEntity<String> response = rest.postForEntity("/api/auth/captcha", captchaDTO, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void should_limit_visit_in_minutes() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Forwarded-For", "192.168.1.1");
+        HttpEntity<CaptchaDTO> requestEntity = new HttpEntity<>(new CaptchaDTO(), headers);
+        for (int i = 0; i < 4; i++) {
+            rest.postForEntity("/api/auth/captcha", requestEntity, byte[].class);
+        }
+        ResponseEntity<byte[]> responseEntity = rest.postForEntity("/api/auth/captcha", requestEntity, byte[].class);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        String responseBody = new String(Objects.requireNonNull(responseEntity.getBody()), StandardCharsets.UTF_8);
+        assertTrue(responseBody.contains("请求太频繁"));
+        assertTrue(responseBody.contains("10002"));
+    }
+
+    @Test
+    void should_invalid_captcha_after_expiration(){
+        redisTemplate.opsForValue().set("captcha:0e596dd6bf4347c18dce6871e1cbdc7b", "1111", 1, TimeUnit.SECONDS);
+        CaptchaDTO captchaDTO1 = new CaptchaDTO();
+        captchaDTO1.setUuid("0e596dd6bf4347c18dce6871e1cbdc7b");
+        captchaDTO1.setCode("1111");
+        ResponseEntity<byte[]> responseEntity = rest.postForEntity("/api/auth/captcha/verify", captchaDTO1, byte[].class);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        String responseBody = new String(Objects.requireNonNull(responseEntity.getBody()), StandardCharsets.UTF_8);
+        assertTrue(responseBody.contains("验证码失效"));
+
     }
 
 }

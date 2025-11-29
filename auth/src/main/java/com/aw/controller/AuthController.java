@@ -1,12 +1,15 @@
 package com.aw.controller;
 
+import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
-import com.aw.dto.groups.LoginGroup;
-import com.aw.dto.groups.RefreshGroup;
-import com.aw.dto.groups.RegisterGroup;
+import com.aw.dto.groups.*;
+import com.aw.exception.BizException;
 import com.aw.exception.Result;
+import com.aw.limit.AccessLimit;
+import com.aw.limit.LimitType;
 import com.aw.service.AuthService;
 import com.aw.validate.ValidatorUtil;
+import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +50,21 @@ public class AuthController {
         ValidatorUtil.validate(loginDTO, RefreshGroup.class);
         LoginVO loginVO = authService.logout(loginDTO);
         return Result.success(loginVO);
+    }
+
+    @PostMapping("/captcha")
+    @AccessLimit(seconds = 60, limitType = LimitType.IP)
+    public Result<CaptchaVO> captcha(@RequestBody CaptchaDTO captchaDTO) {
+        ValidatorUtil.validate(captchaDTO, CaptchaGroup.class);
+        CaptchaVO captchaVO = authService.captcha(captchaDTO);
+        return Result.success(captchaVO);
+    }
+
+    @PostMapping("/captcha/verify")
+    public Result<CaptchaVO> captchaVerify(@RequestBody CaptchaDTO captchaDTO) {
+        ValidatorUtil.validate(captchaDTO, CaptchaVerifyGroup.class);
+        authService.captchaVerify(captchaDTO);
+        return Result.success();
     }
 
 
