@@ -1,9 +1,6 @@
 package com.aw.dto;
 
-import com.aw.dto.groups.LoginGroup;
-import com.aw.dto.groups.LogoutGroup;
-import com.aw.dto.groups.RefreshGroup;
-import com.aw.dto.groups.RegisterGroup;
+import com.aw.dto.groups.*;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,7 +13,7 @@ public class LoginDTO {
     @NotBlank(message = "用户名不为空", groups = {RegisterGroup.class, LoginGroup.class})
     private String username;
 
-    @NotBlank(message = "密码不为空", groups = {RegisterGroup.class, LoginGroup.class})
+    @NotBlank(message = "密码不为空", groups = {RegisterGroup.class, LoginGroup.class,ChangePasswordGroup.class})
     private String password;
 
     private String captcha;
@@ -31,5 +28,8 @@ public class LoginDTO {
 
     @NotBlank(message = "refresh =token 不为空", groups = {RefreshGroup.class, LogoutGroup.class})
     private String refreshToken;
+
+    @NotBlank(message = "密码不为空", groups = {ChangePasswordGroup.class})
+    private String oldPassword;
 
 }

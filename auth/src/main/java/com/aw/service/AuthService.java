@@ -18,4 +18,6 @@ public interface AuthService {
     CaptchaVO captcha(CaptchaDTO captchaDTO);
 
     void captchaVerify(CaptchaDTO captchaDTO);
+
+    void passwordChange(LoginDTO loginDTO,Integer userId,String username);
 }
