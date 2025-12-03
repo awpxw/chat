@@ -5,6 +5,7 @@ services:
     image: mysql:8.0
     container_name: mysql
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: chat
@@ -50,64 +51,64 @@ services:
     volumes:
       - /data/service/nacos/logs:/home/nacos/logs
 
-  # Kafka 全家桶（一个都不许少！）
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.0
-    container_name: zookeeper
-    restart: unless-stopped
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  kafka:
-    image: confluentinc/cp-kafka:7.6.0
-    container_name: kafka
-    restart: unless-stopped
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    volumes:
-      - /data/service/kafka:/var/lib/kafka/data
-
-  # 监控（Grafana 保留 UI，其余纯后端）
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    volumes:
-      - /data/service/prometheus:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml   # 你自己有配置就放这里
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - /data/service/grafana:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: clickhouse
-    restart: unless-stopped
-    ports:
-      - "8123:8123"      # HTTP 端口，保留（前端、驱动都用这个）
-      - "9001:9000"      # ← 改成这样！宿主机 9001 → 容器内 9000
-    volumes:
-      - /data/service/clickhouse:/var/lib/clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
+#  # Kafka 全家桶（一个都不许少！）
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:7.6.0
+#    container_name: zookeeper
+#    restart: unless-stopped
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#
+#  kafka:
+#    image: confluentinc/cp-kafka:7.6.0
+#    container_name: kafka
+#    restart: unless-stopped
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,HOST://localhost:9092
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#    volumes:
+#      - /data/service/kafka:/var/lib/kafka/data
+#
+#  # 监控（Grafana 保留 UI，其余纯后端）
+#  prometheus:
+#    image: prom/prometheus:latest
+#    container_name: prometheus
+#    restart: unless-stopped
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - /data/service/prometheus:/prometheus
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml   # 你自己有配置就放这里
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana
+#    restart: unless-stopped
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - /data/service/grafana:/var/lib/grafana
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin123
+#
+#  clickhouse:
+#    image: clickhouse/clickhouse-server:latest
+#    container_name: clickhouse
+#    restart: unless-stopped
+#    ports:
+#      - "8123:8123"      # HTTP 端口，保留（前端、驱动都用这个）
+#      - "9001:9000"      # ← 改成这样！宿主机 9001 → 容器内 9000
+#    volumes:
+#      - /data/service/clickhouse:/var/lib/clickhouse
+#    ulimits:
+#      nofile:
+#        soft: 262144
+#        hard: 262144
