@@ -2,14 +2,14 @@ package com.aw.dto;
 
 import com.aw.dto.groups.UserAddGroup;
 import com.aw.dto.groups.UserDeleteGroup;
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.aw.page.PageParam;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.io.Serial;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class UserDTO {
+@EqualsAndHashCode(callSuper = true)
+public class UserDTO extends PageParam {
 
     @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class})
     private Long id;

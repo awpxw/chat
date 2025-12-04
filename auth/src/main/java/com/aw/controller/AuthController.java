@@ -1,7 +1,5 @@
 package com.aw.controller;
 
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
@@ -12,14 +10,12 @@ import com.aw.exception.Result;
 import com.aw.limit.AccessLimit;
 import com.aw.limit.LimitType;
 import com.aw.login.LoginRequired;
-import com.aw.page.PageRequest;
 import com.aw.service.AuthService;
 import com.aw.validate.ValidatorUtil;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -137,9 +133,14 @@ public class AuthController {
     }
 
     @PostMapping("/user/page")
-    public Result<?> userPage(@RequestBody UserDTO userDTO, PageRequest page) {
-        IPage<User> result = authService.userPage(userDTO, page);
+    public Result<IPage<User>> userPage(@RequestBody UserDTO userDTO) {
+        IPage<User> result = authService.userPage(userDTO);
+        return Result.success(result);
     }
+
+
+
+
 
 
 }

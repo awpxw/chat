@@ -5,7 +5,6 @@ import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.UserDTO;
 import com.aw.entity.User;
-import com.aw.page.PageRequest;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
@@ -41,5 +40,5 @@ public interface AuthService {
 
     void userDelete(UserDTO userDTO);
 
-    IPage<User> userPage(UserDTO userDTO, PageRequest page);
+    IPage<User> userPage(UserDTO userDTO);
 }

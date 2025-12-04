@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.UserDTO;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.AuthService;
@@ -358,6 +359,19 @@ class AuthTest {
         headers.set("x-username", "admin");
         HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
         ResponseEntity<String> response = rest.postForEntity("/auth/dept/delete", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void user_page_success() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setDeptId(1L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<UserDTO> entity = new HttpEntity<>(userDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/user/page", entity, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         System.out.println(response.getBody());
     }

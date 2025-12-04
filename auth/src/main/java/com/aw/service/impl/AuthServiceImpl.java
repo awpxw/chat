@@ -6,7 +6,6 @@ import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.UserDTO;
-import com.aw.dto.groups.DeptUpdateGroup;
 import com.aw.entity.BannedUser;
 import com.aw.entity.Dept;
 import com.aw.entity.User;
@@ -17,12 +16,9 @@ import com.aw.login.UserContext;
 import com.aw.mapper.BannedUserMapper;
 import com.aw.mapper.DeptMapper;
 import com.aw.mapper.UserMapper;
-import com.aw.page.PageRequest;
-import com.aw.page.PageUtils;
 import com.aw.redis.RedisUtils;
 import com.aw.service.AuthService;
 import com.aw.utils.CaptchaUtils;
-import com.aw.validate.ValidatorUtil;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
@@ -321,10 +317,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public IPage<User> userPage(UserDTO userDTO, PageRequest pageParam) {
-
-        return userMapper.selectUserPage(PageUtils.of(pageParam), userDTO);
-
+    public IPage<User> userPage(UserDTO userDTO) {
+        Integer pageNum = userDTO.getPageNum();
+        Integer pageSize = userDTO.getPageSize();
+        return userMapper.selectUserPage(Page.of(pageNum,pageSize), userDTO);
     }
 
     private void deleteUserInfoById(UserDTO userDTO) {
