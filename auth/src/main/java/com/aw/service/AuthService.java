@@ -4,9 +4,12 @@ import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.UserDTO;
+import com.aw.entity.User;
+import com.aw.page.PageRequest;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface AuthService {
 
@@ -37,4 +40,6 @@ public interface AuthService {
     void userUpdate(UserDTO userDTO);
 
     void userDelete(UserDTO userDTO);
+
+    IPage<User> userPage(UserDTO userDTO, PageRequest page);
 }

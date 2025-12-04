@@ -17,6 +17,8 @@ import com.aw.login.UserContext;
 import com.aw.mapper.BannedUserMapper;
 import com.aw.mapper.DeptMapper;
 import com.aw.mapper.UserMapper;
+import com.aw.page.PageRequest;
+import com.aw.page.PageUtils;
 import com.aw.redis.RedisUtils;
 import com.aw.service.AuthService;
 import com.aw.utils.CaptchaUtils;
@@ -26,6 +28,8 @@ import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
@@ -236,22 +240,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Dept selectDeptInfoById(Long deptId) {
-        return ChainWrappers.lambdaQueryChain(Dept.class)
-                .select(Dept::getId, Dept::getName, Dept::getParentId, Dept::getSort)
-                .eq(Dept::getId, deptId)
-                .eq(Dept::getStatus, 1)
-                .last("LIMIT 1")
-                .one();
+        return ChainWrappers.lambdaQueryChain(Dept.class).select(Dept::getId, Dept::getName, Dept::getParentId, Dept::getSort).eq(Dept::getId, deptId).eq(Dept::getStatus, 1).last("LIMIT 1").one();
     }
 
     private Integer selectMaxSortNO(Long parentId) {
-        Dept dept = ChainWrappers.lambdaQueryChain(Dept.class)
-                .select(Dept::getSort)
-                .eq(Dept::getParentId, parentId)
-                .eq(Dept::getStatus, 1)
-                .orderByDesc(Dept::getSort)
-                .last("LIMIT 1")
-                .one();
+        Dept dept = ChainWrappers.lambdaQueryChain(Dept.class).select(Dept::getSort).eq(Dept::getParentId, parentId).eq(Dept::getStatus, 1).orderByDesc(Dept::getSort).last("LIMIT 1").one();
         return Objects.isNull(dept) ? 0 : dept.getSort();
     }
 
@@ -265,13 +258,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private List<Dept> deptTreeToList(DeptVO deptVO) {
-        return Stream
-                .of(deptVO)
-                .flatMap(node ->
-                        Stream.iterate(node, Objects::nonNull, n -> n.getChildren() != null && !n.getChildren().isEmpty() ? n.getChildren().get(0) : null)
-                                .takeWhile(Objects::nonNull))
-                .map(vo -> BeanUtil.toBean(vo, Dept.class))
-                .collect(Collectors.toList());
+        return Stream.of(deptVO).flatMap(node -> Stream.iterate(node, Objects::nonNull, n -> n.getChildren() != null && !n.getChildren().isEmpty() ? n.getChildren().get(0) : null).takeWhile(Objects::nonNull)).map(vo -> BeanUtil.toBean(vo, Dept.class)).collect(Collectors.toList());
 
     }
 
@@ -298,10 +285,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void bindUserToDept(User user, UserDTO userDTO) {
         Long deptId = userDTO.getDeptId();
-        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
-                .eq(User::getId, user.getId())
-                .set(User::getDeptId, deptId)
-                .update();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, user.getId()).set(User::getDeptId, deptId).update();
         if (!result) {
             log.error("绑定用户失败,id：{}", userDTO.getId());
             throw new BizException("绑定用户失败");
@@ -309,14 +293,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private User selectUserInfoByUserId(Long id) {
-        return ChainWrappers.lambdaQueryChain(User.class)
-                .select(User::getId, User::getWorkNo, User::getName, User::getNickname, User::getMobile,
-                        User::getEmail, User::getAvatar, User::getDeptId, User::getPosition, User::getStatus,
-                        User::getIsAdmin, User::getPassword)
-                .eq(User::getId, id)
-                .eq(User::getStatus, 1)
-                .last("LIMIT 1")
-                .one();
+        return ChainWrappers.lambdaQueryChain(User.class).select(User::getId, User::getWorkNo, User::getName, User::getNickname, User::getMobile, User::getEmail, User::getAvatar, User::getDeptId, User::getPosition, User::getStatus, User::getIsAdmin, User::getPassword).eq(User::getId, id).eq(User::getStatus, 1).last("LIMIT 1").one();
     }
 
     @Override
@@ -329,10 +306,7 @@ public class AuthServiceImpl implements AuthService {
     private void updateUserInfoById(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
-        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
-                .eq(User::getId, user.getId())
-                .eq(User::getStatus, userDTO.getStatus())
-                .update(user);
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, user.getId()).eq(User::getStatus, userDTO.getStatus()).update(user);
         if (!result) {
             log.error("更新用户失败,id:{}", userDTO.getId());
             throw new BizException("更新用户失败");
@@ -346,12 +320,16 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public IPage<User> userPage(UserDTO userDTO, PageRequest pageParam) {
+
+        return userMapper.selectUserPage(PageUtils.of(pageParam), userDTO);
+
+    }
+
     private void deleteUserInfoById(UserDTO userDTO) {
         Long id = userDTO.getId();
-        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
-                .eq(User::getId, id)
-                .set(User::getDeleted, null)
-                .update();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, id).set(User::getDeleted, null).update();
         if (!result) {
             log.error("用户移除失败,id:{}", userDTO.getId());
             throw new BizException("用户移除失败");
@@ -436,11 +414,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private List<Dept> selectAllActiveDept() {
-        return ChainWrappers.lambdaQueryChain(Dept.class)
-                .select(Dept::getId, Dept::getParentId, Dept::getName, Dept::getSort, Dept::getStatus)
-                .eq(Dept::getStatus, 1)
-                .orderByAsc(Dept::getSort)
-                .list();
+        return ChainWrappers.lambdaQueryChain(Dept.class).select(Dept::getId, Dept::getParentId, Dept::getName, Dept::getSort, Dept::getStatus).eq(Dept::getStatus, 1).orderByAsc(Dept::getSort).list();
     }
 
     private boolean checkIfEmptyTable(List<Dept> deptList) {

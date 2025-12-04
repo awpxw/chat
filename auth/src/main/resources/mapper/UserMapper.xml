@@ -2,4 +2,39 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aw.mapper.UserMapper">
 
+
+    <resultMap id="BaseResultMap" type="com.aw.entity.User">
+        <id property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="workNo" column="work_no"/>
+        <result property="name" column="name"/>
+        <result property="nickname" column="nickname"/>
+        <result property="mobile" column="mobile"/>
+        <result property="email" column="email"/>
+        <result property="avatar" column="avatar"/>
+        <result property="position" column="position"/>
+        <result property="status" column="status"/>
+        <result property="isAdmin" column="is_admin"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="selectUserPage" resultMap="BaseResultMap">
+        SELECT
+        id, dept_id, work_no, name, nickname, mobile, email, avatar,position, status, is_admin, create_time, update_time
+        FROM t_user
+        WHERE
+        deleted = 0
+        AND status = 1
+        <if test="dto.name != null and dto.name != ''">
+            AND name LIKE CONCAT('%', #{dto.name}, '%')
+        </if>
+        <if test="dto.deptId != null">
+            AND dept_id = #{dto.deptId}
+        </if>
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+
 </mapper>
