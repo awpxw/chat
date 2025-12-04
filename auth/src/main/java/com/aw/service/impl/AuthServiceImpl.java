@@ -4,17 +4,26 @@ import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.entity.BannedUser;
+import com.aw.entity.Dept;
 import com.aw.entity.User;
 import com.aw.jwt.JwtUtil;
+import com.aw.login.LoginUserInfo;
+import com.aw.login.UserContext;
 import com.aw.mapper.BannedUserMapper;
 import com.aw.mapper.UserMapper;
 import com.aw.service.AuthService;
 import com.aw.exception.BizException;
 import com.aw.utils.CaptchaUtils;
 import com.aw.vo.CaptchaVO;
+import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.conditions.ChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
+import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +34,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -134,14 +140,46 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void passwordChange(LoginDTO loginDTO, Integer userId, String username) {
+    public void passwordChange(LoginDTO loginDTO) {
+        LoginUserInfo loginUser = UserContext.get();
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
-                .eq(User::getName, username)
-                .eq(User::getId, userId)
+                .eq(User::getName, loginUser.getUsername())
+                .eq(User::getId, loginUser.getUserId())
                 .eq(User::getPassword, loginDTO.getOldPassword());
         User user = userMapper.selectOne(wrapper);
         user.setPassword(loginDTO.getPassword());
         userMapper.updateById(user);
+    }
+
+    @Override
+    public DeptVO deptTree() {
+        checkIfEmptyTable();
+        return null;
+    }
+
+    private DeptVO checkIfEmptyTable() {
+        List<Dept> deptList = ChainWrappers.lambdaQueryChain(Dept.class)
+                .eq(Dept::getStatus, 1)
+                .list();
+        Map<Long, DeptVO> map = new HashMap<>();
+        List<DeptVO> rootList = new ArrayList<>();
+        for (Dept dept : deptList) {
+            DeptVO vo = new DeptVO();
+            vo.setId(dept.getId());
+            vo.setParentId(dept.getParentId());
+            vo.setName(dept.getName());
+            vo.setSort(dept.getSort());
+            map.put(vo.getId(), vo);
+            if (dept.getParentId() == 0) {
+                rootList.add(vo);
+            } else {
+                DeptVO parent = map.get(dept.getParentId());
+                if (parent != null) {
+                    parent.getChildren().add(vo);
+                }
+            }
+        }
+        return rootList.isEmpty() ? null : rootList.get(0);
     }
 
     private Map<String, String> generateCaptcha(int expireIns) {

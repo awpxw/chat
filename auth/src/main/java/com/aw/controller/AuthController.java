@@ -1,18 +1,23 @@
 package com.aw.controller;
 
 import com.aw.dto.CaptchaDTO;
+import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.groups.*;
-import com.aw.exception.BizException;
 import com.aw.exception.Result;
 import com.aw.limit.AccessLimit;
 import com.aw.limit.LimitType;
+import com.aw.login.LoginRequired;
 import com.aw.service.AuthService;
 import com.aw.validate.ValidatorUtil;
 import com.aw.vo.CaptchaVO;
+import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
@@ -65,12 +70,18 @@ public class AuthController {
     }
 
     @PostMapping("/password/change")
-    public Result<CaptchaVO> passwordChange(@RequestBody LoginDTO loginDTO,
-                                            @RequestHeader(value = "x-user-id", required = false) Integer userId,
-                                            @RequestHeader(value = "x-username", required = false) String username) {
+    @LoginRequired
+    public Result<CaptchaVO> passwordChange(@RequestBody LoginDTO loginDTO) {
         ValidatorUtil.validate(loginDTO, ChangePasswordGroup.class);
-        authService.passwordChange(loginDTO,userId,username);
+        authService.passwordChange(loginDTO);
         return Result.success();
+    }
+
+    @PostMapping("/dept/tree")
+    @LoginRequired
+    public Result<DeptVO> deptTree() {
+        DeptVO deptVO = authService.deptTree();
+        return Result.success(deptVO);
     }
 
 }

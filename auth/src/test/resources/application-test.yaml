@@ -7,8 +7,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.91.129:8848
-        namespace: 47bc373d-81e6-4dac-b494-45132a4d88d4
+        server-addr: 192.168.209.130:8848
+        namespace: dev
         ephemeral: true
     service-registry:
       auto-registration:

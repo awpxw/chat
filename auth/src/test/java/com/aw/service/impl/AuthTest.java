@@ -1,6 +1,7 @@
 package com.aw.service.impl;
 
 import com.aw.dto.CaptchaDTO;
+import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
@@ -45,10 +46,10 @@ class AuthTest {
         redisTemplate.opsForValue().set("captcha:admin", "1111");
         LoginDTO dto = new LoginDTO();
         dto.setUsername("admin");
-        dto.setPassword("admin");
+        dto.setPassword("123456");
         dto.setCaptcha("admin");
         dto.setCaptchaId("1111");
-        ResponseEntity<String> r = rest.postForEntity("/api/auth/login", dto, String.class);
+        ResponseEntity<String> r = rest.postForEntity("/auth/login", dto, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
@@ -112,12 +113,12 @@ class AuthTest {
     void testRegister() {
         redisTemplate.opsForValue().set("captcha:123456", "1111");
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setUsername("user1");
+        loginDTO.setUsername("admin");
         loginDTO.setPassword("123456");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("1111");
         loginDTO.setMobile("19514700697");
-        ResponseEntity<String> response = rest.postForEntity("/api/auth/register", loginDTO, String.class);
+        ResponseEntity<String> response = rest.postForEntity("/auth/register", loginDTO, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -264,5 +265,34 @@ class AuthTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(Objects.requireNonNull(response.getBody()).contains("\"message\":\"无效的 Token\""));
     }
+
+    @Test
+    void dept_tree_success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/tree", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void should_circular_dependency_fail() {
+        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
+        assertEquals("循环依赖异常", e.getMessage());
+    }
+
+    @Test
+    void should_orphan_node_fail() {
+        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
+        assertEquals("孤儿节点异常", e.getMessage());
+    }
+
+    @Test
+    void should_empty_table_fail() {
+        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
+        assertEquals("空数据异常", e.getMessage());
+    }
+
 
 }
