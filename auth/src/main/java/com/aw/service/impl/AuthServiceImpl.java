@@ -3,7 +3,9 @@ package com.aw.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.aw.dto.CaptchaDTO;
+import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.groups.DeptUpdateGroup;
 import com.aw.entity.BannedUser;
 import com.aw.entity.Dept;
 import com.aw.entity.User;
@@ -12,10 +14,12 @@ import com.aw.jwt.JwtUtil;
 import com.aw.login.LoginUserInfo;
 import com.aw.login.UserContext;
 import com.aw.mapper.BannedUserMapper;
+import com.aw.mapper.DeptMapper;
 import com.aw.mapper.UserMapper;
 import com.aw.redis.RedisUtils;
 import com.aw.service.AuthService;
 import com.aw.utils.CaptchaUtils;
+import com.aw.validate.ValidatorUtil;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
@@ -26,10 +30,13 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -49,6 +56,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Resource
     private RedisUtils redisUtils;
+    @Autowired
+    private DeptMapper deptMapper;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -169,10 +178,124 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDept(DeptDTO deptDTO) {
+
+        checkIfCircularDependencyAfterUpdate(deptDTO);
+
+        saveOrUpdateDept(deptDTO);
+
+        deleteDeptCache();
+
+    }
+
+    private void deleteDeptCache() {
+        redisUtils.delete("dept_tree");
+        redisUtils.delayDoubleDelete("dept_tree");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateDept(DeptDTO deptDTO) {
+        if (Objects.nonNull(deptDTO.getId())) {
+            updateDeptById(deptDTO);
+        } else {
+            insertDept(deptDTO);
+        }
+    }
+
+    private void insertDept(DeptDTO deptDTO) {
+        Long parentId = deptDTO.getParentId();
+        String name = deptDTO.getName();
+        Dept dept = new Dept();
+        dept.setName(name);
+        dept.setParentId(parentId);
+        Integer sortNO = selectMaxSortNO(parentId);
+        dept.setSort(sortNO);
+        int result = deptMapper.insert(dept);
+        if (result <= 0) {
+            log.error("保存部门信息失败,部门id:{}", deptDTO.getId());
+            throw new BizException("保存/更新部门失败");
+        }
+    }
+
+    private void updateDeptById(DeptDTO deptDTO) {
+        Dept dept = new Dept();
+        BeanUtil.copyProperties(deptDTO, dept);
+        Dept exist = selectDeptInfoById(dept.getId());
+        if (!Objects.equals(exist.getParentId(), dept.getParentId())) {
+            Integer sort = selectMaxSortNO(dept.getParentId());
+            dept.setSort(sort);
+        }
+        int result = deptMapper.updateById(dept);
+        if (result <= 0) {
+            log.error("更新部门信息失败,部门id:{}", deptDTO.getId());
+            throw new BizException("保存/更新部门失败");
+        }
+    }
+
+    private Dept selectDeptInfoById(Long deptId) {
+        return ChainWrappers.lambdaQueryChain(Dept.class)
+                .select(Dept::getId, Dept::getName, Dept::getParentId, Dept::getSort)
+                .eq(Dept::getId, deptId)
+                .eq(Dept::getStatus, 1)
+                .last("LIMIT 1")
+                .one();
+    }
+
+    private Integer selectMaxSortNO(Long parentId) {
+        Dept dept = ChainWrappers.lambdaQueryChain(Dept.class)
+                .select(Dept::getSort)
+                .eq(Dept::getParentId, parentId)
+                .eq(Dept::getStatus, 1)
+                .orderByDesc(Dept::getSort)
+                .last("LIMIT 1")
+                .one();
+        return Objects.isNull(dept) ? 0 : dept.getSort();
+    }
+
+    private void checkIfCircularDependencyAfterUpdate(DeptDTO deptDTO) {
+        DeptVO deptVO = loadDeptTreeFromDB();
+        List<Dept> deptList = deptTreeToList(deptVO);
+        Dept dept = new Dept();
+        BeanUtils.copyProperties(deptDTO, dept);
+        deptList.add(dept);
+        checkIfCircularDependency(deptList);
+    }
+
+    private List<Dept> deptTreeToList(DeptVO deptVO) {
+        return Stream
+                .of(deptVO)
+                .flatMap(node ->
+                        Stream.iterate(node, Objects::nonNull, n -> n.getChildren() != null && !n.getChildren().isEmpty() ? n.getChildren().get(0) : null)
+                                .takeWhile(Objects::nonNull))
+                .map(vo -> BeanUtil.toBean(vo, Dept.class))
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteDept(DeptDTO deptDTO) {
+
+        removeWithChildren(deptDTO);
+
+        deleteDeptCache();
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void removeWithChildren(DeptDTO deptDTO) {
+        Long deptId = deptDTO.getId();
+        int isSuccess = deptMapper.logicDeleteWithChildren(deptId);
+        if (isSuccess <= 0) {
+            throw new BizException("删除部门失败,部门id为" + deptDTO.getId());
+        }
+    }
+
+
     private List<Dept> checkIfCircularDependency(List<Dept> activeDept) {
-        Map<Long, Long> parentMap = activeDept
-                .stream()
-                .collect(Collectors.toMap(Dept::getId, Dept::getParentId, (a, b) -> a));
+        Map<Long, Long> parentMap = activeDept.stream().collect(Collectors.toMap(Dept::getId, Dept::getParentId, (a, b) -> a));
         Set<Long> visiting = new HashSet<>();
         Set<Long> visited = new HashSet<>();
         for (Dept dept : activeDept) {
@@ -186,10 +309,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * DFS 递归检测是否有环
      */
-    private boolean hasCycle(Long currentId,
-                             Map<Long, Long> parentMap,
-                             Set<Long> visiting,
-                             Set<Long> visited) {
+    private boolean hasCycle(Long currentId, Map<Long, Long> parentMap, Set<Long> visiting, Set<Long> visited) {
         if (visiting.contains(currentId)) {
             return true;
         }
@@ -228,10 +348,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private List<Dept> ignoreOrphanNode(List<Dept> allDept) {
-        return allDept
-                .stream()
-                .filter(dept -> Objects.nonNull(dept.getParentId()))
-                .collect(Collectors.toList());
+        return allDept.stream().filter(dept -> Objects.nonNull(dept.getParentId())).collect(Collectors.toList());
     }
 
     private DeptVO defaultRoot() {

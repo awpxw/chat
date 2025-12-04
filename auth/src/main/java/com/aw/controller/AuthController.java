@@ -1,6 +1,7 @@
 package com.aw.controller;
 
 import com.aw.dto.CaptchaDTO;
+import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.groups.*;
 import com.aw.exception.Result;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
@@ -83,6 +86,24 @@ public class AuthController {
         return Result.success(deptVO);
     }
 
+    @PostMapping("/dept/update")
+    @LoginRequired
+    public Result<DeptVO> updateDept(@RequestBody DeptDTO deptDTO) {
+        if (Objects.nonNull(deptDTO.getId())) {
+            ValidatorUtil.validate(deptDTO, DeptUpdateGroup.class);
+        }else {
+            ValidatorUtil.validate(deptDTO, DeptAddGroup.class);
+        }
+        authService.updateDept(deptDTO);
+        return Result.success();
+    }
 
+    @PostMapping("/dept/delete")
+    @LoginRequired
+    public Result<DeptVO> deleteDept(@RequestBody DeptDTO deptDTO) {
+        ValidatorUtil.validate(deptDTO, DeptDeleteGroup.class);
+        authService.deleteDept(deptDTO);
+        return Result.success();
+    }
 
 }

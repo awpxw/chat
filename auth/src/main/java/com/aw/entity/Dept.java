@@ -1,16 +1,21 @@
 package com.aw.entity;// Dept.java
 
+import com.aw.fill.BaseEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_dept")
-public class Dept {
+public class Dept extends BaseEntity implements Serializable {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long parentId;
 
@@ -19,11 +24,5 @@ public class Dept {
     private Integer sort;
 
     private Integer status;
-
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createdTime;
-
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updatedTime;
 
 }

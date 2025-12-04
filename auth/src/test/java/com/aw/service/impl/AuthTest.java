@@ -309,4 +309,57 @@ class AuthTest {
         System.out.println(response.getBody());
     }
 
+    @Test
+    void add_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setName("产研中心");
+        deptDTO.setParentId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void update_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setId(1996491080738594817L);
+        deptDTO.setName("产研中心(update)");
+        deptDTO.setParentId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
+
+    @Test
+    void update_dept_failed_when_cyclic_dependency() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void delete_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/delete", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
 }

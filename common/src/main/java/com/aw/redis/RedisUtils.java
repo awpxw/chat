@@ -25,16 +25,24 @@ public class RedisUtils {
 
     private final StringRedisTemplate redisTemplate;
 
-    /** 默认过期时间 10 分钟 */
+    /**
+     * 默认过期时间 10 分钟
+     */
     private static final long DEFAULT_EXPIRE = 10 * 60L;
 
-    /** 防雪崩：随机额外时间 0~5 分钟 */
+    /**
+     * 防雪崩：随机额外时间 0~5 分钟
+     */
     private static final long RANDOM_EXPIRE_RANGE = 5 * 60L;
 
-    /** 空值占位符，防止穿透 */
+    /**
+     * 空值占位符，防止穿透
+     */
     private static final String NULL_VALUE = "__NULL__";
 
-    /** 本地缓存：Caffeine（热点数据毫秒级返回） */
+    /**
+     * 本地缓存：Caffeine（热点数据毫秒级返回）
+     */
     private final Cache<String, Object> localCache = Caffeine.newBuilder()
             .expireAfterWrite(5, TimeUnit.MINUTES)    // 本地缓存比 Redis 稍短
             .maximumSize(20_000)
@@ -104,23 +112,30 @@ public class RedisUtils {
         }
     }
 
-    /** 删除缓存（同时删 Redis 和本地） */
+    /**
+     * 删除缓存（同时删 Redis 和本地）
+     */
     public void delete(String key) {
         redisTemplate.delete(key);
         localCache.invalidate(key);
     }
 
-    /** 延迟双删（写完库后调用） */
+    /**
+     * 延迟双删（写完库后调用）
+     */
     @Async("ioExecutor")
     public void delayDoubleDelete(String key) {
         try {
             Thread.sleep(1000);
             redisTemplate.delete(key);
             localCache.invalidate(key);
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {
+        }
     }
 
-    /** 手动设置缓存（预热专用） */
+    /**
+     * 手动设置缓存（预热专用）
+     */
     public <T> void set(String key, T data) {
         set(key, data, DEFAULT_EXPIRE, TimeUnit.SECONDS);
     }
