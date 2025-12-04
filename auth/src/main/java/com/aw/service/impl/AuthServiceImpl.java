@@ -5,6 +5,7 @@ import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.UserDTO;
 import com.aw.dto.groups.DeptUpdateGroup;
 import com.aw.entity.BannedUser;
 import com.aw.entity.Dept;
@@ -284,12 +285,85 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public void userAdd(UserDTO userDTO) {
+
+        Long id = userDTO.getId();
+
+        User user = selectUserInfoByUserId(id);
+
+        bindUserToDept(user, userDTO);
+
+    }
+
+    private void bindUserToDept(User user, UserDTO userDTO) {
+        Long deptId = userDTO.getDeptId();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, user.getId())
+                .set(User::getDeptId, deptId)
+                .update();
+        if (!result) {
+            log.error("绑定用户失败,id：{}", userDTO.getId());
+            throw new BizException("绑定用户失败");
+        }
+    }
+
+    private User selectUserInfoByUserId(Long id) {
+        return ChainWrappers.lambdaQueryChain(User.class)
+                .select(User::getId, User::getWorkNo, User::getName, User::getNickname, User::getMobile,
+                        User::getEmail, User::getAvatar, User::getDeptId, User::getPosition, User::getStatus,
+                        User::getIsAdmin, User::getPassword)
+                .eq(User::getId, id)
+                .eq(User::getStatus, 1)
+                .last("LIMIT 1")
+                .one();
+    }
+
+    @Override
+    public void userUpdate(UserDTO userDTO) {
+
+        updateUserInfoById(userDTO);
+
+    }
+
+    private void updateUserInfoById(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, user.getId())
+                .eq(User::getStatus, userDTO.getStatus())
+                .update(user);
+        if (!result) {
+            log.error("更新用户失败,id:{}", userDTO.getId());
+            throw new BizException("更新用户失败");
+        }
+    }
+
+    @Override
+    public void userDelete(UserDTO userDTO) {
+
+        deleteUserInfoById(userDTO);
+
+    }
+
+    private void deleteUserInfoById(UserDTO userDTO) {
+        Long id = userDTO.getId();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, id)
+                .set(User::getDeleted, null)
+                .update();
+        if (!result) {
+            log.error("用户移除失败,id:{}", userDTO.getId());
+            throw new BizException("用户移除失败");
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void removeWithChildren(DeptDTO deptDTO) {
         Long deptId = deptDTO.getId();
         int isSuccess = deptMapper.logicDeleteWithChildren(deptId);
         if (isSuccess <= 0) {
-            throw new BizException("删除部门失败,部门id为" + deptDTO.getId());
+            throw new BizException("删除部门失败,部门id为" + deptId);
         }
     }
 

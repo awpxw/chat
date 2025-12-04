@@ -3,6 +3,7 @@ package com.aw.service;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.UserDTO;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
@@ -30,4 +31,10 @@ public interface AuthService {
     void updateDept(DeptDTO deptDTO);
 
     void deleteDept(DeptDTO deptDTO);
+
+    void userAdd(UserDTO userDTO);
+
+    void userUpdate(UserDTO userDTO);
+
+    void userDelete(UserDTO userDTO);
 }

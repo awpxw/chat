@@ -3,6 +3,7 @@ package com.aw.controller;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.UserDTO;
 import com.aw.dto.groups.*;
 import com.aw.exception.Result;
 import com.aw.limit.AccessLimit;
@@ -103,6 +104,29 @@ public class AuthController {
     public Result<DeptVO> deleteDept(@RequestBody DeptDTO deptDTO) {
         ValidatorUtil.validate(deptDTO, DeptDeleteGroup.class);
         authService.deleteDept(deptDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/user/add")
+    @LoginRequired
+    public Result<DeptVO> userAdd(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserAddGroup.class);
+        authService.userAdd(userDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/user/update")
+    @LoginRequired
+    public Result<DeptVO> userUpdate(@RequestBody UserDTO userDTO) {
+        authService.userUpdate(userDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/user/delete")
+    @LoginRequired
+    public Result<DeptVO> userDelete(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserDeleteGroup.class);
+        authService.userDelete(userDTO);
         return Result.success();
     }
 
