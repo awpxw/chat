@@ -22,6 +22,7 @@ public interface AuthService {
 
     void passwordChange(LoginDTO loginDTO);
 
-    DeptVO deptTree();
+    DeptVO loadDeptTreeFromDB();
 
+    DeptVO deptTree();
 }

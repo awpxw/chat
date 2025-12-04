@@ -1,7 +1,6 @@
 package com.aw.controller;
 
 import com.aw.dto.CaptchaDTO;
-import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.dto.groups.*;
 import com.aw.exception.Result;
@@ -83,5 +82,7 @@ public class AuthController {
         DeptVO deptVO = authService.deptTree();
         return Result.success(deptVO);
     }
+
+
 
 }

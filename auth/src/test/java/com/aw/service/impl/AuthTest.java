@@ -1,11 +1,13 @@
 package com.aw.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.DeptDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.AuthService;
+import com.aw.vo.DeptVO;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ActiveProfiles("test")
 class AuthTest {
 
     @Autowired
@@ -274,25 +275,38 @@ class AuthTest {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<String> response = rest.postForEntity("/auth/dept/tree", entity, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
     }
 
     @Test
     void should_circular_dependency_fail() {
         BizException e = assertThrows(BizException.class, () -> authService.deptTree());
-        assertEquals("循环依赖异常", e.getMessage());
+        assertEquals("部门树存在循环依赖，请检查 parent_id 设置", e.getMessage());
     }
 
     @Test
     void should_orphan_node_fail() {
-        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
-        assertEquals("孤儿节点异常", e.getMessage());
+        DeptVO deptVO = authService.deptTree();
+        String jsonStr = JSONUtil.toJsonStr(deptVO);
+        System.out.printf("jsonStr=%s", jsonStr);
+        assertFalse(jsonStr.contains("Vue技术组"));
     }
 
     @Test
     void should_empty_table_fail() {
-        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
-        assertEquals("空数据异常", e.getMessage());
+        DeptVO deptVO = authService.deptTree();
+        assertNotNull(deptVO);
     }
 
+    @Test
+    void read_dept_from_cache_success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/tree", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
 
 }

@@ -1,40 +1,35 @@
 package com.aw.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
 import com.aw.entity.BannedUser;
 import com.aw.entity.Dept;
 import com.aw.entity.User;
+import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
 import com.aw.login.LoginUserInfo;
 import com.aw.login.UserContext;
 import com.aw.mapper.BannedUserMapper;
 import com.aw.mapper.UserMapper;
+import com.aw.redis.RedisUtils;
 import com.aw.service.AuthService;
-import com.aw.exception.BizException;
 import com.aw.utils.CaptchaUtils;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.DeptVO;
 import com.aw.vo.LoginVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.conditions.ChainWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Resource
     private JwtUtil jwtUtil;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -142,33 +140,80 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void passwordChange(LoginDTO loginDTO) {
         LoginUserInfo loginUser = UserContext.get();
-        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
-                .eq(User::getName, loginUser.getUsername())
-                .eq(User::getId, loginUser.getUserId())
-                .eq(User::getPassword, loginDTO.getOldPassword());
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getName, loginUser.getUsername()).eq(User::getId, loginUser.getUserId()).eq(User::getPassword, loginDTO.getOldPassword());
         User user = userMapper.selectOne(wrapper);
         user.setPassword(loginDTO.getPassword());
         userMapper.updateById(user);
     }
 
     @Override
-    public DeptVO deptTree() {
-        checkIfEmptyTable();
-        return null;
+    public DeptVO loadDeptTreeFromDB() {
+        List<Dept> allDept = selectAllActiveDept();
+        boolean isEmptyTable = checkIfEmptyTable(allDept);
+        if (isEmptyTable) {
+            return defaultRoot();
+        }
+        List<Dept> activeDept = ignoreOrphanNode(allDept);
+        List<Dept> effectDept = checkIfCircularDependency(activeDept);
+        return assembledDeptTree(effectDept);
     }
 
-    private DeptVO checkIfEmptyTable() {
-        List<Dept> deptList = ChainWrappers.lambdaQueryChain(Dept.class)
-                .eq(Dept::getStatus, 1)
-                .list();
+    public DeptVO deptTree() {
+
+        String key = redisUtils.key("dept_tree");
+
+        return redisUtils.get(key, () -> {
+            DeptVO deptVO = loadDeptTreeFromDB();
+            return BeanUtil.toBean(deptVO, DeptVO.class);
+        }, DeptVO.class);
+
+    }
+
+    private List<Dept> checkIfCircularDependency(List<Dept> activeDept) {
+        Map<Long, Long> parentMap = activeDept
+                .stream()
+                .collect(Collectors.toMap(Dept::getId, Dept::getParentId, (a, b) -> a));
+        Set<Long> visiting = new HashSet<>();
+        Set<Long> visited = new HashSet<>();
+        for (Dept dept : activeDept) {
+            if (hasCycle(dept.getId(), parentMap, visiting, visited)) {
+                throw new BizException("部门树存在循环依赖，请检查 parent_id 设置");
+            }
+        }
+        return activeDept;
+    }
+
+    /**
+     * DFS 递归检测是否有环
+     */
+    private boolean hasCycle(Long currentId,
+                             Map<Long, Long> parentMap,
+                             Set<Long> visiting,
+                             Set<Long> visited) {
+        if (visiting.contains(currentId)) {
+            return true;
+        }
+        if (visited.contains(currentId)) {
+            return false;
+        }
+        visiting.add(currentId);
+        Long parentId = parentMap.get(currentId);
+        if (parentId != null && parentId != 0) {
+            if (hasCycle(parentId, parentMap, visiting, visited)) {
+                return true;
+            }
+        }
+        visiting.remove(currentId);
+        visited.add(currentId);
+        return false;
+    }
+
+    private DeptVO assembledDeptTree(List<Dept> activeDept) {
         Map<Long, DeptVO> map = new HashMap<>();
         List<DeptVO> rootList = new ArrayList<>();
-        for (Dept dept : deptList) {
+        for (Dept dept : activeDept) {
             DeptVO vo = new DeptVO();
-            vo.setId(dept.getId());
-            vo.setParentId(dept.getParentId());
-            vo.setName(dept.getName());
-            vo.setSort(dept.getSort());
+            BeanUtils.copyProperties(dept, vo);
             map.put(vo.getId(), vo);
             if (dept.getParentId() == 0) {
                 rootList.add(vo);
@@ -180,6 +225,35 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         return rootList.isEmpty() ? null : rootList.get(0);
+    }
+
+    private List<Dept> ignoreOrphanNode(List<Dept> allDept) {
+        return allDept
+                .stream()
+                .filter(dept -> Objects.nonNull(dept.getParentId()))
+                .collect(Collectors.toList());
+    }
+
+    private DeptVO defaultRoot() {
+        DeptVO root = new DeptVO();
+        root.setId(0L);
+        root.setParentId(null);
+        root.setName("集团总部");
+        root.setSort(0);
+        root.setChildren(new ArrayList<>());
+        return root;
+    }
+
+    private List<Dept> selectAllActiveDept() {
+        return ChainWrappers.lambdaQueryChain(Dept.class)
+                .select(Dept::getId, Dept::getParentId, Dept::getName, Dept::getSort, Dept::getStatus)
+                .eq(Dept::getStatus, 1)
+                .orderByAsc(Dept::getSort)
+                .list();
+    }
+
+    private boolean checkIfEmptyTable(List<Dept> deptList) {
+        return CollectionUtils.isEmpty(deptList);
     }
 
     private Map<String, String> generateCaptcha(int expireIns) {
@@ -212,10 +286,7 @@ public class AuthServiceImpl implements AuthService {
     private void checkPhoneRepeat(LoginDTO loginDTO) {
         String username = loginDTO.getUsername();
         String mobile = loginDTO.getMobile();
-        LambdaUpdateWrapper<User> wrapper =
-                new LambdaUpdateWrapper<User>()
-                        .eq(User::getName, username)
-                        .eq(User::getMobile, mobile);
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<User>().eq(User::getName, username).eq(User::getMobile, mobile);
         List<User> users = userMapper.selectList(wrapper);
         if (!CollectionUtils.isEmpty(users)) {
             throw new BizException("手机号重复");
@@ -248,9 +319,7 @@ public class AuthServiceImpl implements AuthService {
     private void checkAccountBanned(LoginDTO loginDTO) {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getName, username)
-                .eq(User::getPassword, password));
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getName, username).eq(User::getPassword, password));
         Long id = user.getId();
         List<BannedUser> bannedUsers = bannedUserMapper.selectList(new LambdaUpdateWrapper<BannedUser>().eq(BannedUser::getUserId, id));
         if (Objects.nonNull(bannedUsers) && !bannedUsers.isEmpty()) {
@@ -272,21 +341,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void checkCaptchaNull(LoginDTO loginDTO) {
-        if (Objects.isNull(loginDTO)
-                || Objects.isNull(loginDTO.getCaptcha())
-                || Objects.isNull(loginDTO.getCaptchaId())) {
+        if (Objects.isNull(loginDTO) || Objects.isNull(loginDTO.getCaptcha()) || Objects.isNull(loginDTO.getCaptchaId())) {
             throw new BizException("验证码不能为空");
         }
     }
 
     private void checkNameAndPassword(LoginDTO loginDTO) {
         try {
-            if (Objects.nonNull(loginDTO)
-                    && Objects.nonNull(loginDTO.getUsername())
-                    && Objects.nonNull(loginDTO.getPassword())) {
-                LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
-                        .eq(User::getName, loginDTO.getUsername())
-                        .eq(User::getPassword, loginDTO.getPassword());
+            if (Objects.nonNull(loginDTO) && Objects.nonNull(loginDTO.getUsername()) && Objects.nonNull(loginDTO.getPassword())) {
+                LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getName, loginDTO.getUsername()).eq(User::getPassword, loginDTO.getPassword());
                 User user = userMapper.selectOne(wrapper);
                 if (Objects.nonNull(user)) {
                     log.info("success");
