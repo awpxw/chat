@@ -1,12 +1,13 @@
 package com.aw.mapper;
 
-import com.aw.entity.BannedUser;
+import com.aw.entity.Role;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 禁用用户
+ * 角色表 Mapper 接口
  */
 @Mapper
-public interface BannedUserMapper extends BaseMapper<BannedUser> {
+public interface RoleMapper extends BaseMapper<Role> {
+
 }

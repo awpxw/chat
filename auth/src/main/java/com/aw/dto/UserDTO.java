@@ -1,8 +1,11 @@
 package com.aw.dto;
 
 import com.aw.dto.groups.UserAddGroup;
+import com.aw.dto.groups.UserBanGroup;
 import com.aw.dto.groups.UserDeleteGroup;
 import com.aw.page.PageParam;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class UserDTO extends PageParam {
 
-    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class})
+    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class, UserBanGroup.class})
     private Long id;
 
     @NotNull(groups = UserAddGroup.class)
@@ -31,10 +34,19 @@ public class UserDTO extends PageParam {
 
     private String position;
 
+    @NotNull(groups = {UserBanGroup.class})
+    @Min(0)
+    @Max(1)
     private Integer status;
+
+    @NotNull(groups = {UserAddGroup.class})
+    @Min(0)
+    @Max(1)
+    private Integer originStatus;
 
     private Integer isAdmin;
 
     private String password;
+
 
 }

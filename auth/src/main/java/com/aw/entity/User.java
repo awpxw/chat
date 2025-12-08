@@ -70,12 +70,6 @@ public class User extends BaseEntity implements Serializable {
     private String position;
 
     /**
-     * 状态：1在职 2离职 0禁用
-     */
-    @TableField("status")
-    private Integer status;
-
-    /**
      * 是否管理员：0否 1是
      */
     @TableField("is_admin")

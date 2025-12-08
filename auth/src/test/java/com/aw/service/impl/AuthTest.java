@@ -1,14 +1,17 @@
 package com.aw.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.aw.dto.CaptchaDTO;
-import com.aw.dto.DeptDTO;
-import com.aw.dto.LoginDTO;
-import com.aw.dto.UserDTO;
+import com.aw.dto.*;
+import com.aw.entity.Role;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
-import com.aw.service.AuthService;
+import com.aw.login.LoginUserInfo;
+import com.aw.login.UserContext;
+import com.aw.service.*;
 import com.aw.vo.DeptVO;
+import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.MenuTreeVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,9 +21,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -35,13 +38,22 @@ class AuthTest {
     TestRestTemplate rest;
 
     @Resource
-    private AuthService authService;
+    private LoginService loginService;
+
+    @Resource
+    private DeptService deptService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
 
     @Resource
     private JwtUtil jwtUtil;
+
+    @Resource
+    private RoleService roleService;
+
+    @Resource
+    private MenuService menuService;
 
     @Test
     void login_success() {
@@ -60,7 +72,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setUsername("admin");
         loginDTO.setPassword("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO));
         assertEquals("验证码不能为空", e.getMessage());
     }
 
@@ -70,21 +82,21 @@ class AuthTest {
         loginDTO.setUsername("admin");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO));
         assertEquals("账号或密码错误", e.getMessage());
 
         LoginDTO loginDTO1 = new LoginDTO();
         loginDTO1.setPassword("111");
         loginDTO1.setCaptcha("123456");
         loginDTO1.setCaptchaId("123456");
-        BizException e1 = assertThrows(BizException.class, () -> authService.login(loginDTO1));
+        BizException e1 = assertThrows(BizException.class, () -> loginService.login(loginDTO1));
         assertEquals("账号或密码错误", e1.getMessage());
 
         LoginDTO loginDTO2 = new LoginDTO();
         loginDTO2.setUsername("admin");
         loginDTO2.setCaptcha("123456");
         loginDTO2.setCaptchaId("123456");
-        BizException e2 = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e2 = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("账号或密码错误", e2.getMessage());
     }
 
@@ -95,7 +107,7 @@ class AuthTest {
         loginDTO2.setPassword("admin");
         loginDTO2.setCaptcha("123456");
         loginDTO2.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -107,7 +119,7 @@ class AuthTest {
         loginDTO2.setPassword("test");
         loginDTO2.setCaptcha("captcha:123456");
         loginDTO2.setCaptchaId("1111");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("账号已被禁用", e.getMessage());
     }
 
@@ -130,7 +142,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setUsername("admin");
         loginDTO.setPassword("admin");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("用户名重复", e.getMessage());
     }
 
@@ -140,7 +152,7 @@ class AuthTest {
         loginDTO.setUsername("admin1");
         loginDTO.setPassword("1");
         loginDTO.setMobile("19514700698");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("手机号重复", e.getMessage());
     }
 
@@ -152,7 +164,7 @@ class AuthTest {
         loginDTO.setMobile("19514700697");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -170,7 +182,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
         loginDTO.setRefreshToken(accessTokenWithExpired);
-        BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -179,7 +191,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
         loginDTO.setRefreshToken(accessTokenWithExpired + "///");
-        BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -281,13 +293,13 @@ class AuthTest {
 
     @Test
     void should_circular_dependency_fail() {
-        BizException e = assertThrows(BizException.class, () -> authService.deptTree());
+        BizException e = assertThrows(BizException.class, () -> deptService.tree());
         assertEquals("部门树存在循环依赖，请检查 parent_id 设置", e.getMessage());
     }
 
     @Test
     void should_orphan_node_fail() {
-        DeptVO deptVO = authService.deptTree();
+        DeptVO deptVO = deptService.tree();
         String jsonStr = JSONUtil.toJsonStr(deptVO);
         System.out.printf("jsonStr=%s", jsonStr);
         assertFalse(jsonStr.contains("Vue技术组"));
@@ -295,7 +307,7 @@ class AuthTest {
 
     @Test
     void should_empty_table_fail() {
-        DeptVO deptVO = authService.deptTree();
+        DeptVO deptVO = deptService.tree();
         assertNotNull(deptVO);
     }
 
@@ -338,7 +350,6 @@ class AuthTest {
     }
 
 
-
     @Test
     void update_dept_failed_when_cyclic_dependency() {
         HttpHeaders headers = new HttpHeaders();
@@ -376,6 +387,95 @@ class AuthTest {
         System.out.println(response.getBody());
     }
 
+    @Test
+    void role_update_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655644L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997957596516491266L);
+        roleDTO.setCode("code_update");
+        roleDTO.setName("name_update");
+        roleDTO.setDataScope(1);
+        roleService.roleUpdate(roleDTO);
+    }
 
+    @Test
+    void role_add_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setCode("code");
+        roleDTO.setName("name");
+        roleDTO.setDataScope(1);
+        roleService.roleUpdate(roleDTO);
+    }
+
+    @Test
+    void role_delete_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997957596516491266L);
+        roleService.roleDelete(roleDTO);
+    }
+
+    @Test
+    void role_page_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setPageNum(1);
+        roleDTO.setPageSize(10);
+        IPage<Role> page = roleService.page(roleDTO);
+        System.out.println(JSONUtil.toJsonStr(page.getRecords()));
+    }
+
+    @Test
+    void role_tree_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuTreeResultVO tree = menuService.tree();
+        System.out.println(JSONUtil.toJsonStr(tree));
+    }
+
+    @Test
+    void menu_add_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuDTO menuDTO = new MenuDTO();
+        menuDTO.setName("name_update");
+        menuDTO.setParentId(2L);
+        menuDTO.setPath("path_update");
+        menuDTO.setType(1);
+        menuService.update(menuDTO);
+    }
+
+    @Test
+    void menu_update_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuDTO menuDTO = new MenuDTO();
+        menuDTO.setId(1997957596516491266L);
+        menuDTO.setName("name_update");
+        menuDTO.setParentId(2L);
+        menuDTO.setPath("path_update");
+        menuService.update(menuDTO);
+    }
+
+    @Test
+    void menu_delete_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuTreeResultVO tree = menuService.tree();
+        System.out.println(JSONUtil.toJsonStr(tree));
+    }
 
 }
