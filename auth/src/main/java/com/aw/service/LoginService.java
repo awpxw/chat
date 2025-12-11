@@ -13,7 +13,7 @@ public interface LoginService {
 
     LoginVO refresh(LoginDTO loginVO);
 
-    LoginVO logout(LoginDTO loginDTO);
+    void logout(LoginDTO loginDTO);
 
     CaptchaVO captcha(CaptchaDTO captchaDTO);
 

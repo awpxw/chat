@@ -48,8 +48,8 @@ public class LoginController {
     @PostMapping("/logout")
     public Result<LoginVO> logout(@RequestBody LoginDTO loginDTO) {
         ValidatorUtil.validate(loginDTO, RefreshGroup.class);
-        LoginVO loginVO = loginService.logout(loginDTO);
-        return Result.success(loginVO);
+        loginService.logout(loginDTO);
+        return Result.success();
     }
 
     @PostMapping("/captcha")

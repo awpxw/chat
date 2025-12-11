@@ -14,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class UserDTO extends PageParam {
 
-    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class, UserBanGroup.class, UserMenuTreeGroup.class})
+    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class, UserBanGroup.class, UserMenuTreeGroup.class,UserKickGroup.class})
     private Long id;
 
     @NotNull(groups = UserAddGroup.class)

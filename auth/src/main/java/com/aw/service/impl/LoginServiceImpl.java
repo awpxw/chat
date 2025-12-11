@@ -19,11 +19,14 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -37,6 +40,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Resource
     private JwtUtil jwtUtil;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -95,8 +101,24 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public LoginVO logout(LoginDTO loginDTO) {
-        return null;
+    public void logout(LoginDTO loginDTO) {
+        String accessToken = loginDTO.getAccessToken();
+        String refreshToken = loginDTO.getRefreshToken();
+        Long accessRemain = remainTime(accessToken);
+        Long refreshRemain = remainTime(refreshToken);
+        stringRedisTemplate.opsForValue().set("blacklist:access:" + accessToken, "__NULL__", accessRemain, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set("blacklist:refresh:" + refreshToken, "__NULL__", refreshRemain, TimeUnit.SECONDS);
+    }
+
+    private Long remainTime(String token) {
+        try {
+            Date expiration = jwtUtil.parseToken(token).getExpiration();
+            long remain = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+            return Math.max(remain, 0);
+        } catch (Exception e) {
+            log.warn("解析 token 失败，也加入黑名单: {}", e.getMessage());
+            return 3600L;
+        }
     }
 
     @Override
@@ -183,9 +205,7 @@ public class LoginServiceImpl implements LoginService {
         String password = loginDTO.getPassword();
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getName, username).eq(User::getPassword, password));
         Long id = user.getId();
-        List<User> bannedUsers = userMapper.selectList(new LambdaUpdateWrapper<User>()
-                .eq(User::getStatus, 1)
-                .eq(User::getId, id));
+        List<User> bannedUsers = userMapper.selectList(new LambdaUpdateWrapper<User>().eq(User::getStatus, 1).eq(User::getId, id));
         if (Objects.nonNull(bannedUsers) && !bannedUsers.isEmpty()) {
             throw new BizException("账号已被禁用");
         }

@@ -20,4 +20,6 @@ public interface UserService {
     void allotRole(UserDTO userDTO);
 
     MenuTreeResultVO menuTree(UserDTO userDTO);
+
+    void kick(UserDTO userDTO);
 }

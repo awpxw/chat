@@ -1,10 +1,7 @@
 package com.aw.controller;
 
 import com.aw.dto.UserDTO;
-import com.aw.dto.groups.UserAddGroup;
-import com.aw.dto.groups.UserAllotRoleGroup;
-import com.aw.dto.groups.UserDeleteGroup;
-import com.aw.dto.groups.UserMenuTreeGroup;
+import com.aw.dto.groups.*;
 import com.aw.entity.User;
 import com.aw.exception.Result;
 import com.aw.login.LoginRequired;
@@ -78,6 +75,14 @@ public class UserController {
         ValidatorUtil.validate(userDTO, UserMenuTreeGroup.class);
         MenuTreeResultVO tree = userService.menuTree(userDTO);
         return Result.success(tree);
+    }
+
+    @PostMapping("/kick")
+    @LoginRequired
+    public Result<String> kick(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserKickGroup.class);
+        userService.kick(userDTO);
+        return Result.success();
     }
 
 

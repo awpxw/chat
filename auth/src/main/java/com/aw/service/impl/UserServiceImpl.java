@@ -128,6 +128,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public void kick(UserDTO userDTO) {
+
+    }
+
     private List<Menu> selectMenuByUserId(UserDTO userDTO) {
         return userMapper.selectMenuByUserId(userDTO);
     }
