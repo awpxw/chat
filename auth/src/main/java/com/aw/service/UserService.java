@@ -16,4 +16,6 @@ public interface UserService {
 
     void ban(UserDTO userDTO);
 
+    void allotRole(UserDTO userDTO);
+
 }

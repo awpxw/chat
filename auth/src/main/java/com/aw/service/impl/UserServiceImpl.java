@@ -2,9 +2,13 @@ package com.aw.service.impl;
 
 import com.aw.dto.UserDTO;
 import com.aw.entity.User;
+import com.aw.entity.UserRole;
 import com.aw.exception.BizException;
+import com.aw.login.UserContext;
 import com.aw.mapper.UserMapper;
+import com.aw.mapper.UserRoleMapper;
 import com.aw.service.UserService;
+import com.aw.snowflake.IdWorker;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -13,12 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private IdWorker idWorker;
 
     @Override
     public void add(UserDTO userDTO) {
@@ -91,6 +104,37 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public void allotRole(UserDTO userDTO) {
+
+        List<UserRole> userRoles = dto2Entity(userDTO);
+
+        insertBatch(userRoles);
+
+    }
+
+    private void insertBatch(List<UserRole> userRoles) {
+        Long loginUserId = UserContext.get().getUserId();
+        Integer success = userRoleMapper.insertBatch(userRoles, loginUserId);
+        if (success <= 0) {
+            log.error("用户分配角色失败，id：{}", loginUserId);
+            throw new BizException("用户分配角色失败");
+        }
+    }
+
+    private List<UserRole> dto2Entity(UserDTO userDTO) {
+        Long userId = userDTO.getId();
+        List<Long> roleIds = userDTO.getRoleIds();
+        List<UserRole> userRoles = new ArrayList<>();
+        for (Long roleId : roleIds) {
+            UserRole userRole = new UserRole();
+            userRole.setId(idWorker.nextId());
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRoles.add(userRole);
+        }
+        return userRoles;
+    }
 
 
     private void deleteUserInfoById(UserDTO userDTO) {

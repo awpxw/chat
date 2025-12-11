@@ -112,7 +112,7 @@ public class RoleServiceImpl implements RoleService {
     public void insertBatch(RoleDTO roleDTO, List<RoleMenu> roleMenus) {
         Long id = roleDTO.getId();
         Long userId = UserContext.get().getUserId();
-        Integer success = roleMenuMapper.insertBatch(roleMenus, idWorker.nextId(), userId);
+        Integer success = roleMenuMapper.insertBatch(roleMenus, userId);
         if (success <= 0) {
             log.error("新增权限失败，角色id：{}", id);
             throw new BizException("新增权限失败");
@@ -124,11 +124,10 @@ public class RoleServiceImpl implements RoleService {
         List<Long> menuIds = roleDTO.getMenuIds();
         ArrayList<RoleMenu> roleMenus = new ArrayList<>();
         for (Long menuId : menuIds) {
-            RoleMenu roleMenu = RoleMenu
-                    .builder()
-                    .roleId(id)
-                    .menuId(menuId)
-                    .build();
+            RoleMenu roleMenu = new RoleMenu();
+            roleMenu.setId(idWorker.nextId());
+            roleMenu.setRoleId(id);
+            roleMenu.setMenuId(menuId);
             roleMenus.add(roleMenu);
         }
         return roleMenus;

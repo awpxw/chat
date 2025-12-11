@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 
 @Data
-@Builder
 @TableName("t_role_menu")
 @AllArgsConstructor
 @NoArgsConstructor

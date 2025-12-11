@@ -1,6 +1,7 @@
 package com.aw.dto;
 
 import com.aw.dto.groups.UserAddGroup;
+import com.aw.dto.groups.UserAllotRoleGroup;
 import com.aw.dto.groups.UserBanGroup;
 import com.aw.dto.groups.UserDeleteGroup;
 import com.aw.page.PageParam;
@@ -9,6 +10,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -47,6 +50,9 @@ public class UserDTO extends PageParam {
     private Integer isAdmin;
 
     private String password;
+
+    @NotNull(groups = {UserAllotRoleGroup.class})
+    private List<Long> roleIds;
 
 
 }

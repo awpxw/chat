@@ -55,6 +55,8 @@ class AuthTest {
 
     @Resource
     private MenuService menuService;
+    @Autowired
+    private UserService userService;
 
     @Test
     void login_success() {
@@ -499,6 +501,17 @@ class AuthTest {
         roleDTO.setId(1997956836609294338L);
         roleDTO.setMenuIds(List.of(1L));
         roleService.cancel(roleDTO);
+    }
+
+    @Test
+    void user_allot_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1996148884936118275L);
+        userDTO.setRoleIds(List.of(1997956836609294338L));
+        userService.allotRole(userDTO);
     }
 
 }

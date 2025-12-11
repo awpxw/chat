@@ -2,6 +2,7 @@ package com.aw.controller;
 
 import com.aw.dto.UserDTO;
 import com.aw.dto.groups.UserAddGroup;
+import com.aw.dto.groups.UserAllotRoleGroup;
 import com.aw.dto.groups.UserDeleteGroup;
 import com.aw.entity.User;
 import com.aw.exception.Result;
@@ -58,6 +59,14 @@ public class UserController {
     @LoginRequired
     public Result<String> ban(@RequestBody UserDTO userDTO) {
         userService.ban(userDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/allot/role")
+    @LoginRequired
+    public Result<String> allotRole(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserAllotRoleGroup.class);
+        userService.allotRole(userDTO);
         return Result.success();
     }
 

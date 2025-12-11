@@ -14,7 +14,6 @@ import java.util.List;
 public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
 
     Integer insertBatch(@Param("roleMenus") List<RoleMenu> roleMenus,
-                        @Param("id") Long id,
                         @Param("userId") Long userId);
 
 }
