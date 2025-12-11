@@ -1,8 +1,12 @@
 package com.aw.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.nacos.common.utils.CollectionUtils;
+import com.alibaba.nacos.common.utils.StringUtils;
 import com.aw.dto.CaptchaDTO;
 import com.aw.dto.LoginDTO;
+import com.aw.dto.UserDTO;
 import com.aw.entity.User;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
@@ -10,9 +14,12 @@ import com.aw.login.LoginUserInfo;
 import com.aw.login.UserContext;
 import com.aw.mapper.UserMapper;
 import com.aw.service.LoginService;
+import com.aw.service.UserService;
 import com.aw.utils.CaptchaUtils;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
+import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.MenuTreeVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import io.jsonwebtoken.Claims;
@@ -22,11 +29,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -43,6 +49,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    private UserService userService;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -216,7 +223,47 @@ public class LoginServiceImpl implements LoginService {
         User user = userMapper.selectOne(wrapper);
         Long userId = user.getId();
         String userName = user.getName();
-        return jwtUtil.generateAccessToken(userId, userName, null);
+        HashMap<String, Object> extraClaims = new HashMap<>();
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(userId);
+        MenuTreeResultVO menuTreeResultVO = userService.menuTree(userDTO);
+        extraClaims.put("menuTree", JSONUtil.toJsonStr(menuTreeResultVO));
+        Set<String> perms = generatePerms(menuTreeResultVO);
+        extraClaims.put("perms", JSONUtil.toJsonStr(perms));
+        return jwtUtil.generateAccessToken(userId, userName, extraClaims);
+    }
+
+    private Set<String> generatePerms(MenuTreeResultVO resultVO) {
+        if (resultVO == null || CollUtil.isEmpty(resultVO.getMenuTree())) {
+            return null;
+        }
+        return resultVO.getMenuTree().stream()
+                .flatMap(node -> {
+                    Stream<String> current = Stream.ofNullable(node.getPerms());
+                    Stream<String> children = Optional.ofNullable(node.getChildren())
+                            .orElse(List.of())
+                            .stream()
+                            .flatMap(this::extractPermsFromNode);
+                    return Stream.concat(current, children);
+                })
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+
+    }
+
+    private Stream<String> extractPermsFromNode(MenuTreeVO node) {
+        if (node == null) return Stream.empty();
+
+        Stream<String> current = StringUtils.isNotBlank(node.getPerms())
+                ? Stream.of(node.getPerms())
+                : Stream.empty();
+
+        Stream<String> children = Optional.ofNullable(node.getChildren())
+                .orElse(Collections.emptyList())
+                .stream()
+                .flatMap(this::extractPermsFromNode);
+
+        return Stream.concat(current, children);
     }
 
     private String generateRefreshToken(LoginDTO loginDTO) {
