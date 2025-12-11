@@ -36,5 +36,26 @@
         ORDER BY create_time DESC, id DESC
     </select>
 
+    <select id="selectMenuByUserId" resultType="com.aw.entity.Menu">
+        SELECT m.id,
+               m.parent_id,
+               m.name,
+               m.path,
+               m.component,
+               m.perms,
+               m.type,
+               m.icon,
+               m.sort,
+               m.visible
+        FROM t_user u
+                 LEFT JOIN t_user_role ur ON ur.user_id = u.id AND ur.deleted = 0
+                 LEFT JOIN t_role_menu rm ON rm.role_id = ur.role_id AND rm.deleted = 0
+                 LEFT JOIN t_menu m ON m.id = rm.menu_id AND m.deleted = 0
+        WHERE u.deleted = 0
+          AND ur.deleted = 0
+          AND rm.deleted = 0
+          AND u.id = #{dto.userId}
+    </select>
+
 
 </mapper>

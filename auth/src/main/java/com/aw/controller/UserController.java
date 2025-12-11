@@ -4,12 +4,14 @@ import com.aw.dto.UserDTO;
 import com.aw.dto.groups.UserAddGroup;
 import com.aw.dto.groups.UserAllotRoleGroup;
 import com.aw.dto.groups.UserDeleteGroup;
+import com.aw.dto.groups.UserMenuTreeGroup;
 import com.aw.entity.User;
 import com.aw.exception.Result;
 import com.aw.login.LoginRequired;
 import com.aw.service.UserService;
 import com.aw.validate.ValidatorUtil;
 import com.aw.vo.DeptVO;
+import com.aw.vo.MenuTreeResultVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,5 +71,14 @@ public class UserController {
         userService.allotRole(userDTO);
         return Result.success();
     }
+
+    @PostMapping("/menu/tree")
+    @LoginRequired
+    public Result<MenuTreeResultVO> menuTree(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserMenuTreeGroup.class);
+        MenuTreeResultVO tree = userService.menuTree(userDTO);
+        return Result.success(tree);
+    }
+
 
 }

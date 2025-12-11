@@ -2,6 +2,7 @@ package com.aw.service;
 
 import com.aw.dto.UserDTO;
 import com.aw.entity.User;
+import com.aw.vo.MenuTreeResultVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface UserService {
@@ -18,4 +19,5 @@ public interface UserService {
 
     void allotRole(UserDTO userDTO);
 
+    MenuTreeResultVO menuTree(UserDTO userDTO);
 }

@@ -1,9 +1,6 @@
 package com.aw.dto;
 
-import com.aw.dto.groups.UserAddGroup;
-import com.aw.dto.groups.UserAllotRoleGroup;
-import com.aw.dto.groups.UserBanGroup;
-import com.aw.dto.groups.UserDeleteGroup;
+import com.aw.dto.groups.*;
 import com.aw.page.PageParam;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -17,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class UserDTO extends PageParam {
 
-    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class, UserBanGroup.class})
+    @NotNull(groups = {UserAddGroup.class, UserDeleteGroup.class, UserBanGroup.class, UserMenuTreeGroup.class})
     private Long id;
 
     @NotNull(groups = UserAddGroup.class)

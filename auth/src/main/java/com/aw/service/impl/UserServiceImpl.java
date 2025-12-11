@@ -1,6 +1,7 @@
 package com.aw.service.impl;
 
 import com.aw.dto.UserDTO;
+import com.aw.entity.Menu;
 import com.aw.entity.User;
 import com.aw.entity.UserRole;
 import com.aw.exception.BizException;
@@ -9,6 +10,9 @@ import com.aw.mapper.UserMapper;
 import com.aw.mapper.UserRoleMapper;
 import com.aw.service.UserService;
 import com.aw.snowflake.IdWorker;
+import com.aw.utils.tree.TreeUtil;
+import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.MenuTreeVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -111,6 +115,37 @@ public class UserServiceImpl implements UserService {
 
         insertBatch(userRoles);
 
+    }
+
+    @Override
+    public MenuTreeResultVO menuTree(UserDTO userDTO) {
+
+        List<Menu> menus = selectMenuByUserId(userDTO);
+
+        List<MenuTreeVO> treeVO = menu2TreeVO(menus);
+
+        return buildMenuTree(treeVO);
+
+    }
+
+    private List<Menu> selectMenuByUserId(UserDTO userDTO) {
+        return userMapper.selectMenuByUserId(userDTO);
+    }
+
+    private List<MenuTreeVO> menu2TreeVO(List<Menu> menus) {
+        return menus.stream().map(menu -> {
+            MenuTreeVO menuTreeVO = new MenuTreeVO();
+            BeanUtils.copyProperties(menu, menuTreeVO);
+            return menuTreeVO;
+        }).toList();
+    }
+
+
+    private MenuTreeResultVO buildMenuTree(List<MenuTreeVO> treeVO) {
+        List<MenuTreeVO> menuTreeVOS = TreeUtil.buildTree(treeVO, 0L);
+        MenuTreeResultVO menuTreeResultVO = new MenuTreeResultVO();
+        menuTreeResultVO.setMenuTree(menuTreeVOS);
+        return menuTreeResultVO;
     }
 
     private void insertBatch(List<UserRole> userRoles) {
