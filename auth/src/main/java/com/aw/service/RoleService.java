@@ -11,4 +11,9 @@ public interface RoleService {
     void roleDelete(RoleDTO roleDTO);
 
     IPage<Role> page(RoleDTO roleDTO);
+
+    void allot(RoleDTO roleDTO);
+
+    void cancel(RoleDTO roleDTO);
+
 }

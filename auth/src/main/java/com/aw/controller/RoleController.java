@@ -2,10 +2,13 @@ package com.aw.controller;
 
 import cn.hutool.db.Page;
 import com.aw.dto.RoleDTO;
+import com.aw.dto.groups.RoleAllotGroup;
+import com.aw.dto.groups.RoleCancelGroup;
 import com.aw.entity.Role;
 import com.aw.exception.Result;
 import com.aw.login.LoginRequired;
 import com.aw.service.RoleService;
+import com.aw.validate.ValidatorUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +44,26 @@ public class RoleController {
         roleService.page(roleDTO);
         return Result.success();
     }
+
+
+    @PostMapping("/allot")
+    @LoginRequired
+    public Result<String> allot(@RequestBody RoleDTO roleDTO) {
+        ValidatorUtil.validate(roleDTO, RoleAllotGroup.class);
+        roleService.allot(roleDTO);
+        return Result.success();
+    }
+
+
+    @PostMapping("/cancel")
+    @LoginRequired
+    public Result<String> cancel(@RequestBody RoleDTO roleDTO) {
+        ValidatorUtil.validate(roleDTO, RoleCancelGroup.class);
+        roleService.cancel(roleDTO);
+        return Result.success();
+    }
+
+
 
 }
 

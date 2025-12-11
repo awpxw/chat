@@ -3,14 +3,16 @@ package com.aw.entity;
 import com.aw.fill.BaseEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 
 @Data
+@Builder
 @TableName("t_role")
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Role extends BaseEntity {
 

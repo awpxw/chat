@@ -1,4 +1,3 @@
-// common/src/main/java/com/aw/common/domain/BaseEntity.java
 package com.aw.fill;
 
 import com.baomidou.mybatisplus.annotation.*;

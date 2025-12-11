@@ -23,6 +23,7 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -406,8 +407,8 @@ class AuthTest {
         user.setUserId(1564654655645L);
         UserContext.set(user);
         RoleDTO roleDTO = new RoleDTO();
-        roleDTO.setCode("code");
-        roleDTO.setName("name");
+        roleDTO.setCode("codexxx1");
+        roleDTO.setName("namexxx1");
         roleDTO.setDataScope(1);
         roleService.roleUpdate(roleDTO);
     }
@@ -476,6 +477,28 @@ class AuthTest {
         UserContext.set(user);
         MenuTreeResultVO tree = menuService.tree();
         System.out.println(JSONUtil.toJsonStr(tree));
+    }
+
+    @Test
+    void allot_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997956836609294338L);
+        roleDTO.setMenuIds(List.of(1L));
+        roleService.allot(roleDTO);
+    }
+
+    @Test
+    void cancel_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997956836609294338L);
+        roleDTO.setMenuIds(List.of(1L));
+        roleService.cancel(roleDTO);
     }
 
 }
