@@ -13,6 +13,7 @@ import com.aw.snowflake.IdWorker;
 import com.aw.utils.tree.TreeUtil;
 import com.aw.vo.MenuTreeResultVO;
 import com.aw.vo.MenuTreeVO;
+import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -40,25 +41,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public void add(UserDTO userDTO) {
 
-        Long id = userDTO.getId();
+        Long userId = saveUser(userDTO);
 
-        User user = selectUserInfoByUserId(id);
-
-        bindUserToDept(user, userDTO);
+        bindUserToDept(userId, userDTO);
 
     }
 
-    private void bindUserToDept(User user, UserDTO userDTO) {
+    private Long saveUser(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+        int success = userMapper.insert(user);
+        if (success <= 0) {
+            throw new BizException("创建用户失败");
+        }
+        return user.getId();
+    }
+
+    private void bindUserToDept(Long userId, UserDTO userDTO) {
         Long deptId = userDTO.getDeptId();
-        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, user.getId()).set(User::getDeptId, deptId).update();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, userId).set(User::getDeptId, deptId).update();
         if (!result) {
             log.error("绑定用户失败,id：{}", userDTO.getId());
             throw new BizException("绑定用户失败");
         }
-    }
-
-    private User selectUserInfoByUserId(Long id) {
-        return ChainWrappers.lambdaQueryChain(User.class).select(User::getId, User::getWorkNo, User::getName, User::getNickname, User::getMobile, User::getEmail, User::getAvatar, User::getDeptId, User::getPosition, User::getStatus, User::getIsAdmin, User::getPassword).eq(User::getId, id).eq(User::getStatus, 1).last("LIMIT 1").one();
     }
 
     @Override
@@ -71,7 +76,9 @@ public class UserServiceImpl implements UserService {
     private void updateUserInfoById(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
-        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, user.getId()).eq(User::getStatus, userDTO.getStatus()).update(user);
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, userDTO.getId())
+                .update(user);
         if (!result) {
             log.error("更新用户失败,id:{}", userDTO.getId());
             throw new BizException("更新用户失败");
@@ -86,7 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IPage<User> page(UserDTO userDTO) {
+    public IPage<UserPageVO> page(UserDTO userDTO) {
         Integer pageNum = userDTO.getPageNum();
         Integer pageSize = userDTO.getPageSize();
         return userMapper.selectUserPage(Page.of(pageNum, pageSize), userDTO);

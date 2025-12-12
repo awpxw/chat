@@ -9,6 +9,7 @@ import com.aw.service.UserService;
 import com.aw.validate.ValidatorUtil;
 import com.aw.vo.DeptVO;
 import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,8 +50,8 @@ public class UserController {
 
     @PostMapping("/page")
     @LoginRequired
-    public Result<IPage<User>> page(@RequestBody UserDTO userDTO) {
-        IPage<User> result = userService.page(userDTO);
+    public Result<IPage<UserPageVO>> page(@RequestBody UserDTO userDTO) {
+        IPage<UserPageVO> result = userService.page(userDTO);
         return Result.success(result);
     }
 

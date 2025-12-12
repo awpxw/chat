@@ -4,6 +4,7 @@ import com.aw.dto.UserDTO;
 import com.aw.entity.Menu;
 import com.aw.entity.User;
 import com.aw.vo.MenuTreeVO;
+import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,7 +22,7 @@ public interface UserMapper extends BaseMapper<User> {
     /**
      * 条件分页查询（XML 实现）
      */
-    IPage<User> selectUserPage(Page<User> page, @Param("dto") UserDTO userDTO);
+    IPage<UserPageVO> selectUserPage(Page<User> page, @Param("dto") UserDTO userDTO);
 
     List<Menu> selectMenuByUserId(@Param("dto") UserDTO userDTO);
 }
