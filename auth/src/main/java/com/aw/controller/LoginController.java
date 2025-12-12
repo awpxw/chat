@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/auth")
 public class LoginController {
@@ -54,7 +56,7 @@ public class LoginController {
 
     @PostMapping("/captcha")
     @AccessLimit(seconds = 60, limitType = LimitType.IP)
-    public Result<CaptchaVO> captcha(@RequestBody CaptchaDTO captchaDTO) {
+    public Result<CaptchaVO> captcha(@RequestBody CaptchaDTO captchaDTO) throws IOException {
         ValidatorUtil.validate(captchaDTO, CaptchaGroup.class);
         CaptchaVO captchaVO = loginService.captcha(captchaDTO);
         return Result.success(captchaVO);

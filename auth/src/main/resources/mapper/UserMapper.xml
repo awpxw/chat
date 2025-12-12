@@ -54,7 +54,7 @@
         WHERE u.deleted = 0
           AND ur.deleted = 0
           AND rm.deleted = 0
-          AND u.id = #{dto.userId}
+          AND u.id = #{dto.id}
     </select>
 
 

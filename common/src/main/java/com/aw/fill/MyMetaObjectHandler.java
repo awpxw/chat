@@ -1,5 +1,6 @@
 package com.aw.fill;
 
+import com.aw.login.LoginUserInfo;
 import com.aw.login.UserContext;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,9 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, now);
         this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, now);
         this.strictInsertFill(metaObject, "deleted", Integer.class, 0);
-        Long userId = UserContext.get().getUserId();
-        if (userId != null) {
-            this.strictInsertFill(metaObject, "createUser", Long.class, userId);
+        LoginUserInfo user = UserContext.get();
+        if (user != null && user.getUserId() != null) {
+            this.strictInsertFill(metaObject, "createUser", Long.class, user.getUserId());
         }
     }
 

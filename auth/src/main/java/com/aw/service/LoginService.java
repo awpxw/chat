@@ -5,6 +5,8 @@ import com.aw.dto.LoginDTO;
 import com.aw.vo.CaptchaVO;
 import com.aw.vo.LoginVO;
 
+import java.io.IOException;
+
 public interface LoginService {
 
     LoginVO login(LoginDTO loginDTO);
@@ -15,7 +17,7 @@ public interface LoginService {
 
     void logout(LoginDTO loginDTO);
 
-    CaptchaVO captcha(CaptchaDTO captchaDTO);
+    CaptchaVO captcha(CaptchaDTO captchaDTO) throws IOException;
 
     void captchaVerify(CaptchaDTO captchaDTO);
 

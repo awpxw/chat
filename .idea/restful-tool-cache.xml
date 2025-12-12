@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RestfulTool.CacheService">
+    <option name="modules">
+      <map>
+        <entry key="admin">
+          <value>
+            <ModuleState>
+              <option name="requests">
+                <list>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerUiHome" />
+                    <option name="methodName" value="index" />
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerUiHome.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.swagger-ui.path:#{T(org.springdoc.core.Constants).DEFAULT_SWAGGER_UI_PATH}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerWelcomeWebMvc" />
+                    <option name="methodName" value="redirectToUi" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerWelcomeWebMvc.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="errorHtml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                        <option value="jakarta.servlet.http.HttpServletResponse" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="error" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/swagger-config" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerConfigResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerConfigResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/test1" />
+                    <option name="classFqn" value="com.aw.jwt.controller.TestController" />
+                    <option name="methodName" value="Test1" />
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/admin/src/main/java/com/aw/jwt/controller/TestController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                </list>
+              </option>
+            </ModuleState>
+          </value>
+        </entry>
+        <entry key="auth">
+          <value>
+            <ModuleState>
+              <option name="requests">
+                <list>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerUiHome" />
+                    <option name="methodName" value="index" />
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerUiHome.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.swagger-ui.path:#{T(org.springdoc.core.Constants).DEFAULT_SWAGGER_UI_PATH}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerWelcomeWebMvc" />
+                    <option name="methodName" value="redirectToUi" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerWelcomeWebMvc.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="errorHtml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                        <option value="jakarta.servlet.http.HttpServletResponse" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="error" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/swagger-config" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerConfigResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerConfigResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/login" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="login" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.LoginDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/register" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="register" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.LoginDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/refresh" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="refresh" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.LoginDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/logout" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="logout" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.LoginDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/captcha" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="captcha" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.CaptchaDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/captcha/verify" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="captchaVerify" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.CaptchaDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/password/change" />
+                    <option name="classFqn" value="com.aw.controller.LoginController" />
+                    <option name="methodName" value="passwordChange" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.LoginDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/LoginController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/add" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="add" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/update" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="userUpdate" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/delete" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="delete" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/page" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="page" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/ban" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="ban" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/allot/role" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="allotRole" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/menu/tree" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="menuTree" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/user/kick" />
+                    <option name="classFqn" value="com.aw.controller.UserController" />
+                    <option name="methodName" value="kick" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.UserDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/UserController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/dept/tree" />
+                    <option name="classFqn" value="com.aw.controller.DeptController" />
+                    <option name="methodName" value="tree" />
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/DeptController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/dept/update" />
+                    <option name="classFqn" value="com.aw.controller.DeptController" />
+                    <option name="methodName" value="update" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.DeptDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/DeptController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/dept/delete" />
+                    <option name="classFqn" value="com.aw.controller.DeptController" />
+                    <option name="methodName" value="delete" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.DeptDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/DeptController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/role/update" />
+                    <option name="classFqn" value="com.aw.controller.RoleController" />
+                    <option name="methodName" value="update" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.RoleDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/RoleController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/role/delete" />
+                    <option name="classFqn" value="com.aw.controller.RoleController" />
+                    <option name="methodName" value="delete" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.RoleDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/RoleController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/role/page" />
+                    <option name="classFqn" value="com.aw.controller.RoleController" />
+                    <option name="methodName" value="page" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.RoleDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/RoleController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/role/allot" />
+                    <option name="classFqn" value="com.aw.controller.RoleController" />
+                    <option name="methodName" value="allot" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.RoleDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/RoleController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/role/cancel" />
+                    <option name="classFqn" value="com.aw.controller.RoleController" />
+                    <option name="methodName" value="cancel" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.RoleDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/RoleController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/menu/tree" />
+                    <option name="classFqn" value="com.aw.controller.MenuController" />
+                    <option name="methodName" value="tree" />
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/MenuController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/menu/update" />
+                    <option name="classFqn" value="com.aw.controller.MenuController" />
+                    <option name="methodName" value="update" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.MenuDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/MenuController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="POST" />
+                    <option name="path" value="/auth/menu/delete" />
+                    <option name="classFqn" value="com.aw.controller.MenuController" />
+                    <option name="methodName" value="delete" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="com.aw.dto.MenuDTO" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="file://$PROJECT_DIR$/auth/src/main/java/com/aw/controller/MenuController.java" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                </list>
+              </option>
+            </ModuleState>
+          </value>
+        </entry>
+        <entry key="common">
+          <value>
+            <ModuleState>
+              <option name="requests">
+                <list>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerUiHome" />
+                    <option name="methodName" value="index" />
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerUiHome.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.swagger-ui.path:#{T(org.springdoc.core.Constants).DEFAULT_SWAGGER_UI_PATH}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerWelcomeWebMvc" />
+                    <option name="methodName" value="redirectToUi" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerWelcomeWebMvc.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="errorHtml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                        <option value="jakarta.servlet.http.HttpServletResponse" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="error" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/swagger-config" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerConfigResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerConfigResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                </list>
+              </option>
+            </ModuleState>
+          </value>
+        </entry>
+        <entry key="gateway">
+          <value>
+            <ModuleState>
+              <option name="requests">
+                <list>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerUiHome" />
+                    <option name="methodName" value="index" />
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerUiHome.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.swagger-ui.path:#{T(org.springdoc.core.Constants).DEFAULT_SWAGGER_UI_PATH}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerWelcomeWebMvc" />
+                    <option name="methodName" value="redirectToUi" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerWelcomeWebMvc.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="errorHtml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                        <option value="jakarta.servlet.http.HttpServletResponse" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="REQUEST" />
+                    <option name="path" value="/${server.error.path:${error.path:/error}}/" />
+                    <option name="classFqn" value="org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController" />
+                    <option name="methodName" value="error" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="jakarta.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar!/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorController.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/swagger-config" />
+                    <option name="classFqn" value="org.springdoc.webmvc.ui.SwaggerConfigResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-ui/1.7.0/springdoc-openapi-ui-1.7.0.jar!/org/springdoc/webmvc/ui/SwaggerConfigResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml/{group}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/MultipleOpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiJson" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                  <RequestState>
+                    <option name="method" value="GET" />
+                    <option name="path" value="/${springdoc.api-docs.path:#{T(org.springdoc.core.Constants).DEFAULT_API_DOCS_URL}}.yaml" />
+                    <option name="classFqn" value="org.springdoc.webmvc.api.OpenApiWebMvcResource" />
+                    <option name="methodName" value="openapiYaml" />
+                    <option name="parameterTypes">
+                      <list>
+                        <option value="javax.servlet.http.HttpServletRequest" />
+                        <option value="java.lang.String" />
+                        <option value="java.util.Locale" />
+                      </list>
+                    </option>
+                    <option name="fileUrl" value="jar://$MAVEN_REPOSITORY$/org/springdoc/springdoc-openapi-webmvc-core/1.7.0/springdoc-openapi-webmvc-core-1.7.0.jar!/org/springdoc/webmvc/api/OpenApiWebMvcResource.class" />
+                    <option name="languageId" value="JAVA" />
+                  </RequestState>
+                </list>
+              </option>
+            </ModuleState>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

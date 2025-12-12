@@ -29,6 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -49,6 +50,8 @@ public class LoginServiceImpl implements LoginService {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
     private UserService userService;
 
     @Override
@@ -129,7 +132,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public CaptchaVO captcha(CaptchaDTO captchaDTO) {
+    public CaptchaVO captcha(CaptchaDTO captchaDTO) throws IOException {
 
         Integer expireIns = captchaDTO.getExpireIns();
 
@@ -173,7 +176,7 @@ public class LoginServiceImpl implements LoginService {
         String captcha = loginDTO.getCaptcha();
         String captchaId = loginDTO.getCaptchaId();
         try {
-            boolean validate = captchaUtils.validate(captcha, captchaId);
+            boolean validate = captchaUtils.validate(captchaId, captcha);
             if (!validate) {
                 throw new BizException("验证码过期或错误");
             }
@@ -185,7 +188,9 @@ public class LoginServiceImpl implements LoginService {
     private void checkNameAndPassword(LoginDTO loginDTO) {
         try {
             if (Objects.nonNull(loginDTO) && Objects.nonNull(loginDTO.getUsername()) && Objects.nonNull(loginDTO.getPassword())) {
-                LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getName, loginDTO.getUsername()).eq(User::getPassword, loginDTO.getPassword());
+                LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
+                        .eq(User::getName, loginDTO.getUsername())
+                        .eq(User::getPassword, loginDTO.getPassword());
                 User user = userMapper.selectOne(wrapper);
                 if (Objects.nonNull(user)) {
                     log.info("success");
@@ -210,10 +215,11 @@ public class LoginServiceImpl implements LoginService {
     private void checkAccountBanned(LoginDTO loginDTO) {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getName, username).eq(User::getPassword, password));
-        Long id = user.getId();
-        List<User> bannedUsers = userMapper.selectList(new LambdaUpdateWrapper<User>().eq(User::getStatus, 1).eq(User::getId, id));
-        if (Objects.nonNull(bannedUsers) && !bannedUsers.isEmpty()) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getName, username)
+                .eq(User::getPassword, password)
+                .eq(User::getStatus, 0));
+        if (Objects.nonNull(user)) {
             throw new BizException("账号已被禁用");
         }
     }
@@ -307,7 +313,7 @@ public class LoginServiceImpl implements LoginService {
         return userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, Long.parseLong(id)));
     }
 
-    private Map<String, String> generateCaptcha(int expireIns) {
+    private Map<String, String> generateCaptcha(int expireIns) throws IOException {
         return captchaUtils.generateCaptcha(expireIns);
     }
 
