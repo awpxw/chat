@@ -20,20 +20,20 @@
         <result property="deleted" column="deleted"/>
     </resultMap>
 
-    <select id="selectUserPage" resultMap="BaseResultMap">
+    <select id="selectUserPage" resultType="com.aw.vo.UserPageVO">
         SELECT
-        id, dept_id, work_no, name, nickname, mobile, email, avatar,position, status, is_admin, create_time, update_time
-        FROM t_user
+        u.id,u.work_no,u.name,u.nickname,u.mobile,u.email,u.avatar,u.position,u.status,t.name as dept_name
+        FROM t_user u
+        LEFT JOIN t_dept t on u.dept_id = t.id
         WHERE
-        deleted = 0
-        AND status = 1
+        u.deleted = 0
         <if test="dto.name != null and dto.name != ''">
             AND name LIKE CONCAT('%', #{dto.name}, '%')
         </if>
         <if test="dto.deptId != null">
             AND dept_id = #{dto.deptId}
         </if>
-        ORDER BY create_time DESC, id DESC
+        ORDER BY u.create_time DESC, u.id DESC
     </select>
 
     <select id="selectMenuByUserId" resultType="com.aw.entity.Menu">
