@@ -6,21 +6,24 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.91.129:8848
+        server-addr: ${SERVER:192.168.209.130}:8848
         username: nacos
         password: nacos
-        namespace: 47bc373d-81e6-4dac-b494-45132a4d88d4
+        namespace: dev
       config:
         import-check:
           enabled: false
-        server-addr: 192.168.91.129:8848
+        server-addr: ${SERVER:192.168.209.130}:8848
         username: nacos
         password: nacos
         file-extension: yaml
-        namespace: 47bc373d-81e6-4dac-b494-45132a4d88d4
+        namespace: dev
         group: DEFAULT_GROUP
         refresh-enabled: true
         shared-configs:
           - data-id: common.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: log.yaml
             group: DEFAULT_GROUP
             refresh: true

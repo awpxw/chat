@@ -1,0 +1,199 @@
+package com.aw.service.impl;
+
+import com.aw.dto.UserDTO;
+import com.aw.entity.Menu;
+import com.aw.entity.User;
+import com.aw.entity.UserRole;
+import com.aw.exception.BizException;
+import com.aw.login.UserContext;
+import com.aw.mapper.UserMapper;
+import com.aw.mapper.UserRoleMapper;
+import com.aw.service.UserService;
+import com.aw.snowflake.IdWorker;
+import com.aw.utils.tree.TreeUtil;
+import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.MenuTreeVO;
+import com.aw.vo.UserPageVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private IdWorker idWorker;
+
+    @Override
+    public void add(UserDTO userDTO) {
+
+        Long userId = saveUser(userDTO);
+
+        bindUserToDept(userId, userDTO);
+
+    }
+
+    private Long saveUser(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+        int success = userMapper.insert(user);
+        if (success <= 0) {
+            throw new BizException("创建用户失败");
+        }
+        return user.getId();
+    }
+
+    private void bindUserToDept(Long userId, UserDTO userDTO) {
+        Long deptId = userDTO.getDeptId();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, userId).set(User::getDeptId, deptId).update();
+        if (!result) {
+            log.error("绑定用户失败,id：{}", userDTO.getId());
+            throw new BizException("绑定用户失败");
+        }
+    }
+
+    @Override
+    public void update(UserDTO userDTO) {
+
+        updateUserInfoById(userDTO);
+
+    }
+
+    private void updateUserInfoById(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, userDTO.getId())
+                .update(user);
+        if (!result) {
+            log.error("更新用户失败,id:{}", userDTO.getId());
+            throw new BizException("更新用户失败");
+        }
+    }
+
+    @Override
+    public void delete(UserDTO userDTO) {
+
+        deleteUserInfoById(userDTO);
+
+    }
+
+    @Override
+    public IPage<UserPageVO> page(UserDTO userDTO) {
+        Integer pageNum = userDTO.getPageNum();
+        Integer pageSize = userDTO.getPageSize();
+        return userMapper.selectUserPage(Page.of(pageNum, pageSize), userDTO);
+    }
+
+    @Override
+    public void ban(UserDTO userDTO) {
+        Long id = userDTO.getId();
+        Integer status = userDTO.getStatus();
+        Integer originStatus = userDTO.getOriginStatus();
+        boolean success = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, id)
+                .eq(User::getStatus, originStatus)
+                .set(User::getStatus, status)
+                .update();
+        if (!success) {
+            log.error("【禁用/启用】员工失败,id:{}", id);
+            throw new BizException("【禁用/启用】员工失败");
+        }
+    }
+
+    @Override
+    public void allotRole(UserDTO userDTO) {
+
+        List<UserRole> userRoles = dto2Entity(userDTO);
+
+        insertBatch(userRoles);
+
+    }
+
+    @Override
+    public MenuTreeResultVO menuTree(UserDTO userDTO) {
+
+        List<Menu> menus = selectMenuByUserId(userDTO);
+
+        List<MenuTreeVO> treeVO = menu2TreeVO(menus);
+
+        return buildMenuTree(treeVO);
+
+    }
+
+    @Override
+    public void kick(UserDTO userDTO) {
+
+    }
+
+    private List<Menu> selectMenuByUserId(UserDTO userDTO) {
+        return userMapper.selectMenuByUserId(userDTO);
+    }
+
+    private List<MenuTreeVO> menu2TreeVO(List<Menu> menus) {
+        return menus.stream().map(menu -> {
+            MenuTreeVO menuTreeVO = new MenuTreeVO();
+            BeanUtils.copyProperties(menu, menuTreeVO);
+            return menuTreeVO;
+        }).toList();
+    }
+
+
+    private MenuTreeResultVO buildMenuTree(List<MenuTreeVO> treeVO) {
+        List<MenuTreeVO> menuTreeVOS = TreeUtil.buildTree(treeVO, 0L);
+        MenuTreeResultVO menuTreeResultVO = new MenuTreeResultVO();
+        menuTreeResultVO.setMenuTree(menuTreeVOS);
+        return menuTreeResultVO;
+    }
+
+    private void insertBatch(List<UserRole> userRoles) {
+        Long loginUserId = UserContext.get().getUserId();
+        Integer success = userRoleMapper.insertBatch(userRoles, loginUserId);
+        if (success <= 0) {
+            log.error("用户分配角色失败，id：{}", loginUserId);
+            throw new BizException("用户分配角色失败");
+        }
+    }
+
+    private List<UserRole> dto2Entity(UserDTO userDTO) {
+        Long userId = userDTO.getId();
+        List<Long> roleIds = userDTO.getRoleIds();
+        List<UserRole> userRoles = new ArrayList<>();
+        for (Long roleId : roleIds) {
+            UserRole userRole = new UserRole();
+            userRole.setId(idWorker.nextId());
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRoles.add(userRole);
+        }
+        return userRoles;
+    }
+
+
+    private void deleteUserInfoById(UserDTO userDTO) {
+        Long id = userDTO.getId();
+        boolean result = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, id)
+                .set(User::getDeleted, 1)
+                .update();
+        if (!result) {
+            log.error("用户移除失败,id:{}", userDTO.getId());
+            throw new BizException("用户移除失败");
+        }
+    }
+
+}

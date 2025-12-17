@@ -61,3 +61,10 @@ export MYSQL_PASSWORD=s3cUr3_MySql_2025
 export REDIS_HOST=172.16.10.101
 export REDIS_PASSWORD=R3d1s_Str0ng_2025
 ```
+## 线程池
+线程池名称,用途,核心线程,最大线程,队列大小,拒绝策略
+ioExecutor,所有 IO 密集型（写库、调HTTP、发MQ、写日志）,20~50,100~200,1000~5000,CallerRunsPolicy
+cpuExecutor,CPU 密集型（压缩、加密、复杂计算）,CPU核数,CPU×2,100,AbortPolicy
+warmupExecutor,启动预热（部门树、权限、字典）,2,4,10,CallerRunsPolicy
+scheduledExecutor,定时任务（@Scheduled）,5,10,1000,CallerRunsPolicy
+exportExecutor,大数据导出（Excel、报表）,2~5,10,50,CallerRunsPolicy

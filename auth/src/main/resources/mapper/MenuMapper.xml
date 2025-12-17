@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aw.mapper.MenuMapper">
+
+    <insert id="saveOrUpdate" parameterType="com.aw.dto.MenuDTO">
+        INSERT INTO t_menu (parent_id, name, path, component, perms, type, icon, sort, visible)
+        VALUES (#{dto.parentId}, #{dto.name}, #{dto.path}, #{dto.component},
+                #{dto.perms}, #{dto.type}, #{dto.icon}, #{dto.sort}, #{dto.visible}) ON DUPLICATE KEY
+        UPDATE
+            parent_id =
+        VALUES (parent_id), name =
+        VALUES (name), path =
+        VALUES (path), component =
+        VALUES (component), perms =
+        VALUES (perms), type =
+        VALUES (type), icon =
+        VALUES (icon), sort =
+        VALUES (sort), visible =
+        VALUES (visible)
+    </insert>
+
+    <select id="selectAllChildIdsIncludeSelf" resultType="java.lang.Long">
+        WITH RECURSIVE menu_tree AS (
+            SELECT id FROM t_menu WHERE id = #{rootId} AND deleted = 0
+            UNION ALL
+            SELECT m.id FROM t_menu m
+                                 INNER JOIN menu_tree t ON m.parent_id = t.id
+            WHERE m.deleted = 0
+        )
+        SELECT id FROM menu_tree
+    </select>
+
+</mapper>

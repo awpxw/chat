@@ -1,10 +1,17 @@
 package com.aw.service.impl;
 
-import com.aw.dto.CaptchaDTO;
-import com.aw.dto.LoginDTO;
+import cn.hutool.json.JSONUtil;
+import com.aw.dto.*;
+import com.aw.entity.Role;
 import com.aw.exception.BizException;
 import com.aw.jwt.JwtUtil;
-import com.aw.service.AuthService;
+import com.aw.login.LoginUserInfo;
+import com.aw.login.UserContext;
+import com.aw.service.*;
+import com.aw.vo.DeptVO;
+import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.MenuTreeVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,9 +21,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -25,14 +33,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ActiveProfiles("test")
 class AuthTest {
 
     @Autowired
     TestRestTemplate rest;
 
     @Resource
-    private AuthService authService;
+    private LoginService loginService;
+
+    @Resource
+    private DeptService deptService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -40,15 +50,23 @@ class AuthTest {
     @Resource
     private JwtUtil jwtUtil;
 
+    @Resource
+    private RoleService roleService;
+
+    @Resource
+    private MenuService menuService;
+    @Autowired
+    private UserService userService;
+
     @Test
     void login_success() {
         redisTemplate.opsForValue().set("captcha:admin", "1111");
         LoginDTO dto = new LoginDTO();
         dto.setUsername("admin");
-        dto.setPassword("admin");
+        dto.setPassword("123456");
         dto.setCaptcha("admin");
         dto.setCaptchaId("1111");
-        ResponseEntity<String> r = rest.postForEntity("/api/auth/login", dto, String.class);
+        ResponseEntity<String> r = rest.postForEntity("/auth/login", dto, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
@@ -57,7 +75,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setUsername("admin");
         loginDTO.setPassword("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO));
         assertEquals("验证码不能为空", e.getMessage());
     }
 
@@ -67,21 +85,21 @@ class AuthTest {
         loginDTO.setUsername("admin");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO));
         assertEquals("账号或密码错误", e.getMessage());
 
         LoginDTO loginDTO1 = new LoginDTO();
         loginDTO1.setPassword("111");
         loginDTO1.setCaptcha("123456");
         loginDTO1.setCaptchaId("123456");
-        BizException e1 = assertThrows(BizException.class, () -> authService.login(loginDTO1));
+        BizException e1 = assertThrows(BizException.class, () -> loginService.login(loginDTO1));
         assertEquals("账号或密码错误", e1.getMessage());
 
         LoginDTO loginDTO2 = new LoginDTO();
         loginDTO2.setUsername("admin");
         loginDTO2.setCaptcha("123456");
         loginDTO2.setCaptchaId("123456");
-        BizException e2 = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e2 = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("账号或密码错误", e2.getMessage());
     }
 
@@ -92,7 +110,7 @@ class AuthTest {
         loginDTO2.setPassword("admin");
         loginDTO2.setCaptcha("123456");
         loginDTO2.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -104,7 +122,7 @@ class AuthTest {
         loginDTO2.setPassword("test");
         loginDTO2.setCaptcha("captcha:123456");
         loginDTO2.setCaptchaId("1111");
-        BizException e = assertThrows(BizException.class, () -> authService.login(loginDTO2));
+        BizException e = assertThrows(BizException.class, () -> loginService.login(loginDTO2));
         assertEquals("账号已被禁用", e.getMessage());
     }
 
@@ -112,12 +130,12 @@ class AuthTest {
     void testRegister() {
         redisTemplate.opsForValue().set("captcha:123456", "1111");
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setUsername("user1");
+        loginDTO.setUsername("admin");
         loginDTO.setPassword("123456");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("1111");
         loginDTO.setMobile("19514700697");
-        ResponseEntity<String> response = rest.postForEntity("/api/auth/register", loginDTO, String.class);
+        ResponseEntity<String> response = rest.postForEntity("/auth/register", loginDTO, String.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -127,7 +145,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setUsername("admin");
         loginDTO.setPassword("admin");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("用户名重复", e.getMessage());
     }
 
@@ -137,7 +155,7 @@ class AuthTest {
         loginDTO.setUsername("admin1");
         loginDTO.setPassword("1");
         loginDTO.setMobile("19514700698");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("手机号重复", e.getMessage());
     }
 
@@ -149,7 +167,7 @@ class AuthTest {
         loginDTO.setMobile("19514700697");
         loginDTO.setCaptcha("123456");
         loginDTO.setCaptchaId("123456");
-        BizException e = assertThrows(BizException.class, () -> authService.register(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.register(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -167,7 +185,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
         loginDTO.setRefreshToken(accessTokenWithExpired);
-        BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -176,7 +194,7 @@ class AuthTest {
         LoginDTO loginDTO = new LoginDTO();
         String accessTokenWithExpired = jwtUtil.generateAccessTokenWithExpired(1L, "admin", null, -1L);
         loginDTO.setRefreshToken(accessTokenWithExpired + "///");
-        BizException e = assertThrows(BizException.class, () -> authService.refresh(loginDTO));
+        BizException e = assertThrows(BizException.class, () -> loginService.refresh(loginDTO));
         assertEquals("验证码过期或错误", e.getMessage());
     }
 
@@ -263,6 +281,237 @@ class AuthTest {
         );
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(Objects.requireNonNull(response.getBody()).contains("\"message\":\"无效的 Token\""));
+    }
+
+    @Test
+    void dept_tree_success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/tree", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void should_circular_dependency_fail() {
+        BizException e = assertThrows(BizException.class, () -> deptService.tree());
+        assertEquals("部门树存在循环依赖，请检查 parent_id 设置", e.getMessage());
+    }
+
+    @Test
+    void should_orphan_node_fail() {
+        DeptVO deptVO = deptService.tree();
+        String jsonStr = JSONUtil.toJsonStr(deptVO);
+        System.out.printf("jsonStr=%s", jsonStr);
+        assertFalse(jsonStr.contains("Vue技术组"));
+    }
+
+    @Test
+    void should_empty_table_fail() {
+        DeptVO deptVO = deptService.tree();
+        assertNotNull(deptVO);
+    }
+
+    @Test
+    void read_dept_from_cache_success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/tree", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void add_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setName("产研中心");
+        deptDTO.setParentId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void update_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setId(1996491080738594817L);
+        deptDTO.setName("产研中心(update)");
+        deptDTO.setParentId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
+    @Test
+    void update_dept_failed_when_cyclic_dependency() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/update", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void delete_dept_success() {
+        DeptDTO deptDTO = new DeptDTO();
+        deptDTO.setId(2L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<DeptDTO> entity = new HttpEntity<>(deptDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/dept/delete", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void user_page_success() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setDeptId(1L);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-user-id", "1996148884936118274");
+        headers.set("x-username", "admin");
+        HttpEntity<UserDTO> entity = new HttpEntity<>(userDTO, headers);
+        ResponseEntity<String> response = rest.postForEntity("/auth/user/page", entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        System.out.println(response.getBody());
+    }
+
+    @Test
+    void role_update_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655644L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997957596516491266L);
+        roleDTO.setCode("code_update");
+        roleDTO.setName("name_update");
+        roleDTO.setDataScope(1);
+        roleService.roleUpdate(roleDTO);
+    }
+
+    @Test
+    void role_add_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setCode("codexxx1");
+        roleDTO.setName("namexxx1");
+        roleDTO.setDataScope(1);
+        roleService.roleUpdate(roleDTO);
+    }
+
+    @Test
+    void role_delete_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997957596516491266L);
+        roleService.roleDelete(roleDTO);
+    }
+
+    @Test
+    void role_page_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setPageNum(1);
+        roleDTO.setPageSize(10);
+        IPage<Role> page = roleService.page(roleDTO);
+        System.out.println(JSONUtil.toJsonStr(page.getRecords()));
+    }
+
+    @Test
+    void role_tree_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuTreeResultVO tree = menuService.tree();
+        System.out.println(JSONUtil.toJsonStr(tree));
+    }
+
+    @Test
+    void menu_add_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuDTO menuDTO = new MenuDTO();
+        menuDTO.setName("name_update");
+        menuDTO.setParentId(2L);
+        menuDTO.setPath("path_update");
+        menuDTO.setType(1);
+        menuService.update(menuDTO);
+    }
+
+    @Test
+    void menu_update_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuDTO menuDTO = new MenuDTO();
+        menuDTO.setId(1997957596516491266L);
+        menuDTO.setName("name_update");
+        menuDTO.setParentId(2L);
+        menuDTO.setPath("path_update");
+        menuService.update(menuDTO);
+    }
+
+    @Test
+    void menu_delete_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        MenuTreeResultVO tree = menuService.tree();
+        System.out.println(JSONUtil.toJsonStr(tree));
+    }
+
+    @Test
+    void allot_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997956836609294338L);
+        roleDTO.setMenuIds(List.of(1L));
+        roleService.allot(roleDTO);
+    }
+
+    @Test
+    void cancel_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(1997956836609294338L);
+        roleDTO.setMenuIds(List.of(1L));
+        roleService.cancel(roleDTO);
+    }
+
+    @Test
+    void user_allot_role_success() {
+        LoginUserInfo user = new LoginUserInfo();
+        user.setUserId(1564654655645L);
+        UserContext.set(user);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1996148884936118275L);
+        userDTO.setRoleIds(List.of(1997956836609294338L));
+        userService.allotRole(userDTO);
     }
 
 }

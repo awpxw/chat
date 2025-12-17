@@ -1,5 +1,6 @@
 package com.aw.filter;
 
+import cn.hutool.core.util.StrUtil;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.TokenBlacklistService;
 import io.jsonwebtoken.JwtException;
@@ -18,6 +19,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,15 +37,17 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",
-            "/api/auth/logout",
             "/api/auth/captcha",
             "/api/auth/captcha/verify",
             "/v3/api-docs");
 
     private String getToken(ServerHttpRequest request) {
-        String auth = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (auth != null && auth.startsWith("Bearer ")) {
-            return auth.substring(7);
+        List<String> headers = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+        if (headers != null && !headers.isEmpty()) {
+            String auth = headers.get(0);
+            if (StrUtil.isNotBlank(auth) && auth.startsWith("Bearer ")) {
+                return auth.substring(7);
+            }
         }
         return request.getCookies()
                 .getOrDefault("access_token", Collections.emptyList())
@@ -69,6 +73,9 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        if (request.getMethod() == org.springframework.http.HttpMethod.OPTIONS) {
+            return chain.filter(exchange);
+        }
         String path = request.getPath().value(); // 注意：getPath().value() 才是字符串
 
         // 1. 白名单直接放行

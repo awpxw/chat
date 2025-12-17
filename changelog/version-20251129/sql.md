@@ -4,14 +4,14 @@ Navicat Premium Dump SQL
 Source Server         : vm-mysql
 Source Server Type    : MySQL
 Source Server Version : 80044 (8.0.44)
-Source Host           : 192.168.91.129:3306
+Source Host           : 192.168.209.131:3306
 Source Schema         : chat
 
 Target Server Type    : MySQL
 Target Server Version : 80044 (8.0.44)
 File Encoding         : 65001
 
-Date: 29/11/2025 16:40:12
+Date: 04/12/2025 14:21:21
 */
 
 SET NAMES utf8mb4;
@@ -120,8 +120,9 @@ CREATE TABLE `t_dept`  (
 `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (`id`) USING BTREE,
-INDEX `idx_parent`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
+INDEX `idx_parent`(`parent_id` ASC) USING BTREE,
+INDEX `idx_status_sort_parent`(`status` ASC, `sort` ASC, `parent_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for t_emoji
@@ -355,7 +356,7 @@ PRIMARY KEY (`id`) USING BTREE,
 UNIQUE INDEX `work_no`(`work_no` ASC) USING BTREE,
 INDEX `idx_dept`(`dept_id` ASC) USING BTREE,
 INDEX `idx_mobile`(`mobile` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1994312910613098498 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '员工表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1996148884936118275 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '员工表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for t_user_role

@@ -1,17 +1,14 @@
 package com.aw.utils;
 
-import com.aw.exception.BizException;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -39,15 +36,16 @@ public class CaptchaUtils {
     /**
      * 生成验证码图片并返回 uuid（前端存 cookie 或 localStorage）
      */
-    public Map<String, String> generateCaptcha(int expireMinutes) {
+    public Map<String, String> generateCaptcha(int expireMinutes) throws IOException {
         HashMap<String, String> map = new HashMap<>();
         String uuid = UUID.randomUUID().toString().replace("-", "");
         String code = generateCode();
         String redisKey = "captcha:" + uuid;
         redisTemplate.opsForValue().set(redisKey, code.toLowerCase(), expireMinutes == -1 ? EXPIRE_SECOND : expireMinutes, TimeUnit.SECONDS);
         BufferedImage image = createImage(code);
+        String imageToBase64 = convertImageToBase64(image);
         map.put("captchaId", redisKey);
-        map.put("image", image.toString());
+        map.put("image", imageToBase64);
         return map;
     }
 
@@ -56,14 +54,13 @@ public class CaptchaUtils {
      */
     public boolean validate(String uuid, String code) {
         if (uuid == null || code == null) return false;
-        String redisKey = "captcha:" + uuid;
-        String savedCode = redisTemplate.opsForValue().get(redisKey);
+        String savedCode = redisTemplate.opsForValue().get(uuid);
         if (savedCode == null) {
             return false; // 已过期或不存在
         }
         boolean valid = savedCode.equals(code.toLowerCase());
         // 校验完立即删除，防止重复使用
-        redisTemplate.delete(redisKey);
+        redisTemplate.delete(uuid);
         return valid;
     }
 
