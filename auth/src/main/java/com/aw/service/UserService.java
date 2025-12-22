@@ -7,6 +7,8 @@ import com.aw.vo.UserDetailVO;
 import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import java.util.List;
+
 public interface UserService {
 
     void add(UserDTO userDTO);
@@ -29,4 +31,5 @@ public interface UserService {
 
     void updatePass(UserDTO userDTO);
 
+    List<Long> menuList(UserDTO userDTO);
 }

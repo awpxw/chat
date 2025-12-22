@@ -24,5 +24,6 @@ public interface UserMapper extends BaseMapper<User> {
      */
     IPage<UserPageVO> selectUserPage(Page<User> page, @Param("dto") UserDTO userDTO);
 
-    List<Menu> selectMenuByUserId(@Param("dto") UserDTO userDTO);
+    List<Menu> selectMenuByRoleId(@Param("roleId") Long roleId);
+
 }

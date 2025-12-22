@@ -14,6 +14,7 @@ import com.aw.mapper.RoleMenuMapper;
 import com.aw.service.RoleService;
 import com.aw.snowflake.IdWorker;
 import com.aw.validate.ValidatorUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -102,10 +103,19 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void allot(RoleDTO roleDTO) {
 
+        removeAllMenu(roleDTO);
+
         List<RoleMenu> roleMenus = dto2Entity(roleDTO);
 
         insertBatch(roleDTO, roleMenus);
 
+    }
+
+    private void removeAllMenu(RoleDTO roleDTO) {
+        ChainWrappers.lambdaUpdateChain(RoleMenu.class)
+                .eq(RoleMenu::getRoleId, roleDTO.getId())
+                .set(RoleMenu::getDeleted, true)
+                .update();
     }
 
 
@@ -122,7 +132,7 @@ public class RoleServiceImpl implements RoleService {
     private List<RoleMenu> dto2Entity(RoleDTO roleDTO) {
         Long id = roleDTO.getId();
         List<Long> menuIds = roleDTO.getMenuIds();
-        ArrayList<RoleMenu> roleMenus = new ArrayList<>();
+        List<RoleMenu> roleMenus = new ArrayList<>();
         for (Long menuId : menuIds) {
             RoleMenu roleMenu = new RoleMenu();
             roleMenu.setId(idWorker.nextId());

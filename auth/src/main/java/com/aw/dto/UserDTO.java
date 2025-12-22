@@ -16,8 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class UserDTO extends PageParam {
 
-    @NotNull(groups = {UserDeleteGroup.class, UserBanGroup.class,
-            UserMenuTreeGroup.class, UserKickGroup.class, PasswordChange.class})
+    @NotNull(groups = {UserDeleteGroup.class, UserBanGroup.class, UserKickGroup.class, PasswordChange.class})
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
@@ -62,6 +61,9 @@ public class UserDTO extends PageParam {
 
     @NotNull(groups = {UserAllotRoleGroup.class})
     private List<Long> roleIds;
+
+    @NotNull(groups = {UserMenuTreeGroup.class, UserMenuListGroup.class})
+    private Long roleId;
 
 
 }

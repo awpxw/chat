@@ -41,8 +41,8 @@ public class RoleController {
     @PostMapping("/page")
     @LoginRequired
     public Result<IPage<Role>> page(@RequestBody RoleDTO roleDTO) {
-        roleService.page(roleDTO);
-        return Result.success();
+        IPage<Role> page = roleService.page(roleDTO);
+        return Result.success(page);
     }
 
 

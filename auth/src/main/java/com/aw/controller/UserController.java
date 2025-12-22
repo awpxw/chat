@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/auth/user")
@@ -93,6 +95,14 @@ public class UserController {
         ValidatorUtil.validate(userDTO, UserMenuTreeGroup.class);
         MenuTreeResultVO tree = userService.menuTree(userDTO);
         return Result.success(tree);
+    }
+
+    @PostMapping("/menu/list")
+    @LoginRequired
+    public Result<List<Long>> menuList(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserMenuTreeGroup.class);
+        List<Long> menuIds = userService.menuList(userDTO);
+        return Result.success(menuIds);
     }
 
 

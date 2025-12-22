@@ -4,10 +4,10 @@
 
     <insert id="insertBatch">
         INSERT INTO t_role_menu
-        (id,role_id, menu_id, status, create_user, create_time, update_user, update_time, deleted)
+        (id, role_id, menu_id, status, create_user, create_time, update_user, update_time, deleted)
         VALUES
         <foreach collection="roleMenus" item="item" separator=",">
-            (#{item.id},#{item.roleId}, #{item.menuId}, 1, #{userId}, NOW(), #{userId}, NOW(), 0)
+            (#{item.id}, #{item.roleId}, #{item.menuId}, 1, #{userId}, NOW(), #{userId}, NOW(), 0)
         </foreach>
     </insert>
 

@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public MenuTreeResultVO menuTree(UserDTO userDTO) {
 
-        List<Menu> menus = selectMenuByUserId(userDTO);
+        List<Menu> menus = selectMenuByRoleId(userDTO);
 
         List<MenuTreeVO> treeVO = menu2TreeVO(menus);
 
@@ -217,6 +217,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public List<Long> menuList(UserDTO userDTO) {
+
+        List<Menu> menus = selectMenuByRoleId(userDTO);
+
+        return menus.stream().filter(Objects::nonNull).map(Menu::getId).toList();
+
+    }
+
     private void kickOut() {
         String token = UserContext.get().getAccessToken();
         if (token == null) {
@@ -266,8 +275,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private List<Menu> selectMenuByUserId(UserDTO userDTO) {
-        return userMapper.selectMenuByUserId(userDTO);
+    private List<Menu> selectMenuByRoleId(UserDTO userDTO) {
+        return userMapper.selectMenuByRoleId(userDTO.getRoleId());
     }
 
     private List<MenuTreeVO> menu2TreeVO(List<Menu> menus) {
