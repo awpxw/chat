@@ -9,6 +9,7 @@ import com.aw.service.UserService;
 import com.aw.validate.ValidatorUtil;
 import com.aw.vo.DeptVO;
 import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.UserDetailVO;
 import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.annotation.Resource;
@@ -33,10 +34,26 @@ public class UserController {
         return Result.success();
     }
 
+    @PostMapping("/detail")
+    @LoginRequired
+    public Result<UserDetailVO> detail() {
+        UserDetailVO detail = userService.detail();
+        return Result.success(detail);
+    }
+
     @PostMapping("/update")
     @LoginRequired
     public Result<DeptVO> userUpdate(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, UserUpdateGroup.class);
         userService.update(userDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/profile/update")
+    @LoginRequired
+    public Result<DeptVO> profileUpdate(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, ProfileUpdate.class);
+        userService.profileUpdate(userDTO);
         return Result.success();
     }
 
@@ -78,13 +95,13 @@ public class UserController {
         return Result.success(tree);
     }
 
-    @PostMapping("/kick")
+
+    @PostMapping("/changePwd")
     @LoginRequired
-    public Result<String> kick(@RequestBody UserDTO userDTO) {
-        ValidatorUtil.validate(userDTO, UserKickGroup.class);
-        userService.kick(userDTO);
+    public Result<String> updatePass(@RequestBody UserDTO userDTO) {
+        ValidatorUtil.validate(userDTO, PasswordChange.class);
+        userService.updatePass(userDTO);
         return Result.success();
     }
-
 
 }

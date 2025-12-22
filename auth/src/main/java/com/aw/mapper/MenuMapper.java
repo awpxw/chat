@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface MenuMapper extends BaseMapper<Menu> {
 
-    Integer saveOrUpdate(@Param("dto") MenuDTO menuDTO);
+    Integer saveOrUpdate(@Param("dto") MenuDTO menuDTO,@Param("userId") Long userId);
 
     List<Long> selectAllChildIdsIncludeSelf(@Param("rootId") Long rootId);
 

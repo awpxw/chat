@@ -16,7 +16,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class UserDTO extends PageParam {
 
-    @NotNull(groups = {UserDeleteGroup.class, UserBanGroup.class, UserMenuTreeGroup.class, UserKickGroup.class})
+    @NotNull(groups = {UserDeleteGroup.class, UserBanGroup.class,
+            UserMenuTreeGroup.class, UserKickGroup.class, PasswordChange.class})
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
@@ -25,10 +26,12 @@ public class UserDTO extends PageParam {
 
     private String workNo;
 
+    @NotNull(groups = ProfileUpdate.class)
     private String name;
 
     private String nickname;
 
+    @NotNull(groups = ProfileUpdate.class)
     private String mobile;
 
     private String email;
@@ -49,7 +52,13 @@ public class UserDTO extends PageParam {
 
     private Integer isAdmin;
 
+    @NotNull(groups = {PasswordChange.class})
+    private String newPassword;
+
     private String password;
+
+    @NotNull(groups = {PasswordChange.class})
+    private String oldPassword;
 
     @NotNull(groups = {UserAllotRoleGroup.class})
     private List<Long> roleIds;

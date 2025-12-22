@@ -4,6 +4,7 @@ package com.aw.service.impl;
 import com.aw.dto.MenuDTO;
 import com.aw.entity.Menu;
 import com.aw.exception.BizException;
+import com.aw.login.UserContext;
 import com.aw.mapper.MenuMapper;
 import com.aw.redis.RedisUtils;
 import com.aw.service.MenuService;
@@ -31,8 +32,11 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public MenuTreeResultVO tree() {
-        String key = redisUtils.key("menuTree");
+
+        String key = redisUtils.key("menu_tree");
+
         return redisUtils.get(key, this::loadMenuTreeFromDB, 30L, TimeUnit.MINUTES, MenuTreeResultVO.class);
+
     }
 
     private MenuTreeResultVO loadMenuTreeFromDB() {
@@ -84,12 +88,12 @@ public class MenuServiceImpl implements MenuService {
     }
 
     private void deleteCache() {
-        String key = redisUtils.key("menu");
+        String key = redisUtils.key("menu_tree");
         redisUtils.delete(key);
     }
 
     private void updateDB(MenuDTO menuDTO) {
-        boolean success = menuMapper.saveOrUpdate(menuDTO) > 0;
+        boolean success = menuMapper.saveOrUpdate(menuDTO, UserContext.get().getUserId()) > 0;
         if (!success) {
             throw new BizException("【新增/修改】菜单失败");
         }

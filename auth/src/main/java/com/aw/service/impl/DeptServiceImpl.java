@@ -81,13 +81,8 @@ public class DeptServiceImpl implements DeptService {
     }
 
     private void insertDept(DeptDTO deptDTO) {
-        Long parentId = deptDTO.getParentId();
-        String name = deptDTO.getName();
         Dept dept = new Dept();
-        dept.setName(name);
-        dept.setParentId(parentId);
-        Integer sortNO = selectMaxSortNO(parentId);
-        dept.setSort(sortNO);
+        BeanUtils.copyProperties(deptDTO, dept);
         int result = deptMapper.insert(dept);
         if (result <= 0) {
             log.error("保存部门信息失败,部门id:{}", deptDTO.getId());
@@ -96,30 +91,18 @@ public class DeptServiceImpl implements DeptService {
     }
 
     private void updateDeptById(DeptDTO deptDTO) {
-        Dept dept = new Dept();
-        BeanUtil.copyProperties(deptDTO, dept);
-        Dept exist = selectDeptInfoById(dept.getId());
-        if (!Objects.equals(exist.getParentId(), dept.getParentId())) {
-            Integer sort = selectMaxSortNO(dept.getParentId());
-            dept.setSort(sort);
-        }
-        int result = deptMapper.updateById(dept);
-        if (result <= 0) {
+        boolean success = ChainWrappers.lambdaUpdateChain(Dept.class)
+                .eq(Dept::getId, deptDTO.getId())
+                .set(Dept::getParentId, deptDTO.getParentId())
+                .set(Dept::getName, deptDTO.getName())
+                .set(Dept::getSort, deptDTO.getSort())
+                .set(Dept::getStatus, deptDTO.getStatus())
+                .update();
+        if (!success) {
             log.error("更新部门信息失败,部门id:{}", deptDTO.getId());
             throw new BizException("保存/更新部门失败");
         }
     }
-
-    private Dept selectDeptInfoById(Long deptId) {
-        return ChainWrappers.lambdaQueryChain(Dept.class).select(Dept::getId, Dept::getName, Dept::getParentId, Dept::getSort).eq(Dept::getId, deptId).eq(Dept::getStatus, 1).last("LIMIT 1").one();
-    }
-
-    private Integer selectMaxSortNO(Long parentId) {
-        Dept dept = ChainWrappers.lambdaQueryChain(Dept.class).select(Dept::getSort).eq(Dept::getParentId, parentId).eq(Dept::getStatus, 1).orderByDesc(Dept::getSort).last("LIMIT 1").one();
-        return Objects.isNull(dept) ? 0 : dept.getSort();
-    }
-
-
 
     private List<Dept> deptTreeToList(DeptVO deptVO) {
         return Stream.of(deptVO).flatMap(node -> Stream.iterate(node, Objects::nonNull, n -> n.getChildren() != null && !n.getChildren().isEmpty() ? n.getChildren().get(0) : null).takeWhile(Objects::nonNull)).map(vo -> BeanUtil.toBean(vo, Dept.class)).collect(Collectors.toList());
@@ -214,11 +197,19 @@ public class DeptServiceImpl implements DeptService {
     private DeptVO assembledDeptTree(List<Dept> activeDept) {
         Map<Long, DeptVO> map = new HashMap<>();
         List<DeptVO> rootList = new ArrayList<>();
+
+        // 第一遍：所有部门转 VO 并放 map
         for (Dept dept : activeDept) {
             DeptVO vo = new DeptVO();
             BeanUtils.copyProperties(dept, vo);
+            vo.setChildren(new ArrayList<>());  // 初始化 children
             map.put(vo.getId(), vo);
-            if (dept.getParentId() == 0) {
+        }
+
+        // 第二遍：挂 children + 找根
+        for (Dept dept : activeDept) {
+            DeptVO vo = map.get(dept.getId());
+            if (dept.getParentId() == null || dept.getParentId() == 0) {
                 rootList.add(vo);
             } else {
                 DeptVO parent = map.get(dept.getParentId());
@@ -227,6 +218,11 @@ public class DeptServiceImpl implements DeptService {
                 }
             }
         }
+
+        // 可选：排序
+        rootList.sort(Comparator.comparing(DeptVO::getSort, Comparator.nullsLast(Integer::compareTo)));
+        rootList.forEach(vo -> vo.getChildren().sort(Comparator.comparing(DeptVO::getSort, Comparator.nullsLast(Integer::compareTo))));
+
         return rootList.isEmpty() ? null : rootList.get(0);
     }
 

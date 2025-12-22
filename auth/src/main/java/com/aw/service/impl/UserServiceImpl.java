@@ -1,29 +1,40 @@
 package com.aw.service.impl;
 
 import com.aw.dto.UserDTO;
+import com.aw.entity.Dept;
 import com.aw.entity.Menu;
 import com.aw.entity.User;
 import com.aw.entity.UserRole;
 import com.aw.exception.BizException;
+import com.aw.jwt.JwtUtil;
 import com.aw.login.UserContext;
 import com.aw.mapper.UserMapper;
 import com.aw.mapper.UserRoleMapper;
+import com.aw.redis.RedisUtils;
 import com.aw.service.UserService;
 import com.aw.snowflake.IdWorker;
 import com.aw.utils.tree.TreeUtil;
 import com.aw.vo.MenuTreeResultVO;
 import com.aw.vo.MenuTreeVO;
+import com.aw.vo.UserDetailVO;
 import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -37,6 +48,12 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private IdWorker idWorker;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private JwtUtil jwtUtil;
 
     @Override
     public void add(UserDTO userDTO) {
@@ -78,6 +95,13 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(userDTO, user);
         boolean result = ChainWrappers.lambdaUpdateChain(User.class)
                 .eq(User::getId, userDTO.getId())
+                .set(User::getName, user.getName())
+                .set(User::getWorkNo, user.getWorkNo())
+                .set(User::getMobile, userDTO.getMobile())
+                .set(User::getDeptId, userDTO.getDeptId())
+                .set(User::getPosition, userDTO.getPosition())
+                .set(User::getPassword, userDTO.getPassword())
+                .set(User::getStatus, userDTO.getStatus())
                 .update(user);
         if (!result) {
             log.error("更新用户失败,id:{}", userDTO.getId());
@@ -136,8 +160,110 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void kick(UserDTO userDTO) {
+    public UserDetailVO detail() {
 
+        UserDetailVO userDetailVO = findUserById();
+
+        String deptName = findDeptNameById(userDetailVO);
+
+        userDetailVO.setDeptName(deptName);
+
+        return userDetailVO;
+
+    }
+
+    private String findDeptNameById(UserDetailVO userDetailVO) {
+        Dept dept = ChainWrappers.lambdaQueryChain(Dept.class)
+                .eq(Dept::getId, userDetailVO.getDeptId())
+                .one();
+        return dept == null ? null : dept.getName();
+    }
+
+
+    private UserDetailVO findUserById() {
+        Long userId = UserContext.get().getUserId();
+        User user = ChainWrappers.lambdaQueryChain(User.class)
+                .eq(User::getId, userId)
+                .eq(User::getStatus, 1)
+                .one();
+        UserDetailVO userDetailVO = new UserDetailVO();
+        BeanUtils.copyProperties(user, userDetailVO);
+        return userDetailVO;
+    }
+
+    @Override
+    public void profileUpdate(UserDTO userDTO) {
+        boolean success = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, userDTO.getId())
+                .set(User::getName, userDTO.getName())
+                .set(User::getNickname, userDTO.getNickname())
+                .set(User::getMobile, userDTO.getMobile())
+                .set(User::getEmail, userDTO.getEmail())
+                .update();
+        if (!success) {
+            log.error("更新用户个人信息失败，id：{}", userDTO.getId());
+            throw new BizException("更新用户个人信息失败");
+        }
+    }
+
+    @Override
+    public void updatePass(UserDTO userDTO) {
+
+        checkIfInValid(userDTO);
+
+        updatePassword(userDTO);
+
+        kickOut();
+
+    }
+
+    private void kickOut() {
+        String token = UserContext.get().getAccessToken();
+        if (token == null) {
+            return;
+        }
+        try {
+            String tokenStr = token.substring(7);
+            Long ttl = remainSeconds(tokenStr);
+            stringRedisTemplate.opsForValue().set("blacklist:access:" + tokenStr, "__NULL__", ttl, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            stringRedisTemplate.opsForValue().set("blacklist:access:" + token, "__NULL__", 3600, TimeUnit.SECONDS);
+            log.error("token解析失败");
+        }
+    }
+
+    private Long remainSeconds(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtUtil.key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
+        } catch (Exception e) {
+            return 3600L; // 解析失败给个默认值
+        }
+    }
+
+    private void updatePassword(UserDTO userDTO) {
+        String newPassword = userDTO.getNewPassword();
+        String oldPassword = userDTO.getOldPassword();
+        boolean success = ChainWrappers.lambdaUpdateChain(User.class)
+                .eq(User::getId, userDTO.getId())
+                .eq(User::getPassword, oldPassword)
+                .set(User::getPassword, newPassword)
+                .update();
+        if (!success) {
+            throw new BizException("更新密码失败");
+        }
+    }
+
+    private void checkIfInValid(UserDTO userDTO) {
+        String oldPassword = userDTO.getOldPassword();
+        String newPassword = userDTO.getNewPassword();
+        if (Objects.equals(oldPassword, newPassword)) {
+            throw new BizException("新旧密码一致，无法修改");
+        }
     }
 
     private List<Menu> selectMenuByUserId(UserDTO userDTO) {

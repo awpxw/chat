@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.BindException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
     // 1. 业务异常（最常用）
     @ExceptionHandler(BizException.class)
     public Result<?> handleBizException(BizException e, HttpServletResponse response) {
-        log.warn("业务异常: {} traceId={}", e.getMessage(), TraceIdUtil.getTraceId());
+        log.warn("业务异常: {} traceId={}", e.getStackTrace(), TraceIdUtil.getTraceId());
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());  // 500
         return Result.fail(e.getCode(), e.getMessage());
     }

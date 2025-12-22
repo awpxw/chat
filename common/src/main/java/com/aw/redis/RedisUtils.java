@@ -126,7 +126,7 @@ public class RedisUtils {
     @Async("ioExecutor")
     public void delayDoubleDelete(String key) {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
             redisTemplate.delete(key);
             localCache.invalidate(key);
         } catch (InterruptedException ignored) {

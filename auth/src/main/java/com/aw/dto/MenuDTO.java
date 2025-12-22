@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class MenuDTO {
 
-    @NotNull(groups = {MenuUpdateGroup.class, MenuDeleteGroup.class})
+    @NotNull(groups = {MenuDeleteGroup.class})
     private Long id;
 
     @NotNull(groups = {MenuAddGroup.class})

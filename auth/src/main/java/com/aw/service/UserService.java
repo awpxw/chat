@@ -3,6 +3,7 @@ package com.aw.service;
 import com.aw.dto.UserDTO;
 import com.aw.entity.User;
 import com.aw.vo.MenuTreeResultVO;
+import com.aw.vo.UserDetailVO;
 import com.aw.vo.UserPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -22,5 +23,10 @@ public interface UserService {
 
     MenuTreeResultVO menuTree(UserDTO userDTO);
 
-    void kick(UserDTO userDTO);
+    UserDetailVO detail();
+
+    void profileUpdate(UserDTO userDTO);
+
+    void updatePass(UserDTO userDTO);
+
 }

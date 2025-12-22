@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aw.mapper.MenuMapper">
-
     <insert id="saveOrUpdate" parameterType="com.aw.dto.MenuDTO">
-        INSERT INTO t_menu (parent_id, name, path, component, perms, type, icon, sort, visible)
-        VALUES (#{dto.parentId}, #{dto.name}, #{dto.path}, #{dto.component},
-                #{dto.perms}, #{dto.type}, #{dto.icon}, #{dto.sort}, #{dto.visible}) ON DUPLICATE KEY
+        INSERT INTO t_menu (parent_id, name, path, component, perms, type, icon, sort, visible,
+                            status, create_user, create_time, update_user, update_time, deleted)
+        VALUES (#{dto.parentId}, #{dto.name}, #{dto.path}, #{dto.component}, #{dto.perms}, #{dto.type}, #{dto.icon}, #{dto.sort}, #{dto.visible},
+                1, #{userId}, NOW(), #{userId}, NOW(), 0) ON DUPLICATE KEY
         UPDATE
             parent_id =
         VALUES (parent_id), name =
@@ -16,7 +16,9 @@
         VALUES (type), icon =
         VALUES (icon), sort =
         VALUES (sort), visible =
-        VALUES (visible)
+        VALUES (visible), status = 1, update_user =
+        VALUES (update_user), -- 直接引用 INSERT 中的值
+            update_time = NOW(), deleted = 0;
     </insert>
 
     <select id="selectAllChildIdsIncludeSelf" resultType="java.lang.Long">

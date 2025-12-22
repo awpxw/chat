@@ -1,14 +1,17 @@
 package com.aw.filter;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.aw.exception.Result;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.TokenBlacklistService;
-import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Resource;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -18,6 +21,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -60,14 +64,16 @@ public class AuthGlobalFilter implements WebFilter, Ordered {
     private Mono<Void> unAuth(ServerWebExchange exchange, String msg) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().set("Content-Type", "application/json;charset=UTF-8");
-        String json = "{\"code\":401,\"message\":\"" + msg + "\"}";
-        return response.writeWith(Mono.just(response.bufferFactory().wrap(json.getBytes())));
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        Result<String> result = Result.fail(401, msg);
+        DataBuffer buffer = response.bufferFactory()
+                .wrap(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
+        return response.writeWith(Mono.just(buffer)).then(Mono.empty());
     }
 
     @Override
     public int getOrder() {
-        return -100; // 比跨域过滤器先执行
+        return -1000000000;
     }
 
     @Override

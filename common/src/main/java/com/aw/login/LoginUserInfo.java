@@ -9,4 +9,8 @@ public class LoginUserInfo {
 
     private String username;
 
+    private String accessToken;
+
+    private String refreshToken;
+
 }

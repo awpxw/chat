@@ -17,10 +17,12 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String userId = request.getHeader("x-user-id");
         String username = request.getHeader("x-username");
+        String accessToken = request.getHeader("Authorization");
         if (StringUtils.isNotBlank(userId)) {
             LoginUserInfo userInfo = new LoginUserInfo();
             userInfo.setUserId(Long.valueOf(userId));
             userInfo.setUsername(username);
+            userInfo.setAccessToken(accessToken);
             UserContext.set(userInfo);
         }
         return true;

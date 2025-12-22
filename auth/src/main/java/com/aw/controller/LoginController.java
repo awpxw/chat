@@ -69,7 +69,7 @@ public class LoginController {
         return Result.success();
     }
 
-    @PostMapping("/password/change")
+    @PostMapping("/changePwd")
     @LoginRequired
     public Result<CaptchaVO> passwordChange(@RequestBody LoginDTO loginDTO) {
         ValidatorUtil.validate(loginDTO, ChangePasswordGroup.class);

@@ -13,7 +13,7 @@ public class LoginDTO {
     @NotBlank(message = "用户名不为空", groups = {RegisterGroup.class, LoginGroup.class})
     private String username;
 
-    @NotBlank(message = "密码不为空", groups = {RegisterGroup.class, LoginGroup.class,ChangePasswordGroup.class})
+    @NotBlank(message = "密码不为空", groups = {RegisterGroup.class, LoginGroup.class})
     private String password;
 
     private String captchaId;
@@ -26,10 +26,13 @@ public class LoginDTO {
     @NotBlank(message = "access token 不为空", groups = {RefreshGroup.class, LogoutGroup.class})
     private String accessToken;
 
-    @NotBlank(message = "refresh =token 不为空", groups = {RefreshGroup.class, LogoutGroup.class})
+    @NotBlank(message = "refresh =token 不为空", groups = {RefreshGroup.class})
     private String refreshToken;
 
     @NotBlank(message = "密码不为空", groups = {ChangePasswordGroup.class})
     private String oldPassword;
+
+    @NotBlank(message = "密码不为空", groups = {ChangePasswordGroup.class})
+    private String newPassword;
 
 }

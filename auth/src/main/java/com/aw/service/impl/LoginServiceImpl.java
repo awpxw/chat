@@ -13,6 +13,7 @@ import com.aw.jwt.JwtUtil;
 import com.aw.login.LoginUserInfo;
 import com.aw.login.UserContext;
 import com.aw.mapper.UserMapper;
+import com.aw.redis.RedisUtils;
 import com.aw.service.LoginService;
 import com.aw.service.UserService;
 import com.aw.utils.CaptchaUtils;
@@ -26,6 +27,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +55,8 @@ public class LoginServiceImpl implements LoginService {
 
     @Resource
     private UserService userService;
+    @Autowired
+    private RedisUtils redisUtils;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -113,11 +117,8 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public void logout(LoginDTO loginDTO) {
         String accessToken = loginDTO.getAccessToken();
-        String refreshToken = loginDTO.getRefreshToken();
         Long accessRemain = remainTime(accessToken);
-        Long refreshRemain = remainTime(refreshToken);
         stringRedisTemplate.opsForValue().set("blacklist:access:" + accessToken, "__NULL__", accessRemain, TimeUnit.SECONDS);
-        stringRedisTemplate.opsForValue().set("blacklist:refresh:" + refreshToken, "__NULL__", refreshRemain, TimeUnit.SECONDS);
     }
 
     private Long remainTime(String token) {
@@ -162,7 +163,7 @@ public class LoginServiceImpl implements LoginService {
         LoginUserInfo loginUser = UserContext.get();
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getName, loginUser.getUsername()).eq(User::getId, loginUser.getUserId()).eq(User::getPassword, loginDTO.getOldPassword());
         User user = userMapper.selectOne(wrapper);
-        user.setPassword(loginDTO.getPassword());
+        user.setPassword(loginDTO.getNewPassword());
         userMapper.updateById(user);
     }
 
@@ -298,6 +299,11 @@ public class LoginServiceImpl implements LoginService {
     }
 
     private void checkInvalid(LoginDTO loginDTO) {
+        String token = loginDTO.getAccessToken();
+        boolean isKicked = Boolean.TRUE.equals(stringRedisTemplate.hasKey("blacklist:access:" + token));
+        if (isKicked) {
+            throw new BizException("请重新登录");
+        }
         String accessToken = loginDTO.getRefreshToken();
         boolean isValid = jwtUtil.validateToken(accessToken);
         if (!isValid) {
