@@ -114,4 +114,10 @@ public class UserController {
         return Result.success();
     }
 
+    @PostMapping("/online/status")
+    @LoginRequired
+    public Result<String> onlineStatus() {
+        return Result.success();
+    }
+
 }
