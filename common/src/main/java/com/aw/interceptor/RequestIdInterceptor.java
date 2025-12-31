@@ -11,8 +11,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
-// RequestIdInterceptor.java
 @Component
 public class RequestIdInterceptor implements WebMvcConfigurer {
 
