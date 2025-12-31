@@ -24,14 +24,22 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         if (user != null && user.getUserId() != null) {
             this.strictInsertFill(metaObject, "createUser", Long.class, user.getUserId());
         }
+        if (user != null && user.getUsername()!= null) {
+            this.strictInsertFill(metaObject, "createUserName", String.class, user.getUsername());
+        }
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
         Long userId = UserContext.get().getUserId();
+        String userName = UserContext.get().getUsername();
         if (userId != null) {
             this.strictUpdateFill(metaObject, "updateUser", Long.class, userId);
         }
+        if (userId != null) {
+            this.strictUpdateFill(metaObject, "updateUserName", String.class, userName);
+        }
     }
+
 }

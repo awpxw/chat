@@ -33,13 +33,14 @@ services:
     container_name: minio
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin123456
+      MINIO_ROOT_USER: aw               # 根用户名（登录控制台用）
+      MINIO_ROOT_PASSWORD: 0     # 根用户密码（建议至少8位）
     ports:
-      - "9000:9000"
+      - "9000:9000"    # S3 API 接口
+      - "9001:9001"    # 控制台（Web UI）端口，推荐固定为9001，避免随机端口
     volumes:
-      - /data/service/minio:/data
-    command: server /data
+      - /data/service/minio:/data          # 数据持久化目录
+    command: server /data --console-address ":9001"   # 关键修改！
 
   nacos:
     image: nacos-registry.cn-hangzhou.cr.aliyuncs.com/nacos/nacos-server:v2.3.2   # 稳到飞起

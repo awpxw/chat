@@ -32,6 +32,12 @@ public class BaseEntity {
     private Long createUser;
 
     /**
+     * 创建人名称
+     */
+    @TableField(value = "create_user_name", fill = FieldFill.INSERT)
+    private String createUserName;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
@@ -42,6 +48,12 @@ public class BaseEntity {
      */
     @TableField(value = "update_user", fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
+
+    /**
+     * 更新人名称
+     */
+    @TableField(value = "update_user_name", fill = FieldFill.INSERT_UPDATE)
+    private Long updateUserName;
 
     /**
      * 更新时间

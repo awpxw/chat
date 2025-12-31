@@ -1,7 +1,7 @@
 
 package com.aw.config;
 
-import com.aw.minio.MinioProperties;
+import com.aw.properties.MinioProps;
 import io.minio.MinioClient;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,14 @@ import org.springframework.context.annotation.Configuration;
 public class MinioConfig {
 
     @Resource
-    private MinioProperties properties;
+    private MinioProps props;
 
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
-            .endpoint(properties.getEndpoint())
-            .credentials(properties.getAccessKey(), properties.getSecretKey())
+            .endpoint(props.getEndpoint())
+            .credentials(props.getAccessKey(), props.getSecretKey())
             .build();
     }
+
 }

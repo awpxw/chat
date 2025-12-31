@@ -1,13 +1,15 @@
 // common/src/main/java/com/aw/common/util/FileUploadUtil.java
-package com.aw.minio;
+package com.aw.utils;
 
 
+import com.aw.properties.MinioProps;
 import io.minio.*;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ public class FileUploadUtil {
     private MinioClient minioClient;
 
     @Resource
-    private final MinioProperties properties;
+    private final MinioProps properties;
 
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
@@ -46,9 +48,7 @@ public class FileUploadUtil {
         ensureBucket();
 
         // 2. 生成新文件名：年月日/UUID.后缀
-        String datePath = LocalDateTime.now().format(DTF);
-        String suffix = getFileSuffix(originalFilename);
-        String fileName = datePath + "/" + UUID.randomUUID() + suffix;
+        String fileName = createObjectName(originalFilename);
 
         // 3. 上传
         minioClient.putObject(
@@ -62,6 +62,12 @@ public class FileUploadUtil {
 
         // 4. 返回完整 URL
         return getFileUrl(fileName);
+    }
+
+    public String createObjectName(String originalFilename) {
+        String datePath = LocalDateTime.now().format(DTF);
+        String suffix = getFileSuffix(originalFilename);
+        return datePath + "/" + UUID.randomUUID() + suffix;
     }
 
     /**
