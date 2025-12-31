@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [auth, gateway, admin, message, customer]
+        module: [auth, gateway, admin, message, file]
     steps:
       - uses: actions/checkout@v4
       - name: 设置 JDK 17
