@@ -10,7 +10,6 @@ import com.aw.jwt.JwtUtil;
 import com.aw.login.UserContext;
 import com.aw.mapper.UserMapper;
 import com.aw.mapper.UserRoleMapper;
-import com.aw.redis.RedisUtils;
 import com.aw.service.UserService;
 import com.aw.snowflake.IdWorker;
 import com.aw.utils.tree.TreeUtil;
@@ -25,9 +24,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
