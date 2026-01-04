@@ -40,7 +40,7 @@ public class CacheWarmupService {
                     warmDeptTree();
                     log.info("【缓存预热】全部完成，耗时 {} ms", System.currentTimeMillis() - start);
                 } catch (Exception e) {
-                    log.error("【缓存预热】失败", e);
+                    log.error(">>>【缓存预热】失败", e);
                 }
             });
         }

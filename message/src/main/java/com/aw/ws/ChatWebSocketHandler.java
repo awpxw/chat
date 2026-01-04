@@ -1,7 +1,9 @@
 package com.aw.ws;
 
+import cn.hutool.json.JSONUtil;
 import com.aw.dto.MemberDTO;
 import com.aw.dto.MessageDTO;
+import com.aw.entity.Message;
 import com.aw.jwt.JwtUtil;
 import com.aw.service.MemberService;
 import com.aw.service.MessageService;
@@ -18,6 +20,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +57,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
+    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) {
         try {
 
             MessageDTO dto = saveMessage(message);
@@ -88,6 +91,21 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         HttpHeaders headers = session.getHandshakeHeaders();
         String token = Objects.requireNonNull(headers.get("Authorization")).get(0);
         return jwtUtil.getUserId(token);
+    }
+
+    public void pushMessage(Message message, List<Long> userIds) throws IOException {
+        List<WebSocketSession> onlineUserSession = new ArrayList<>();
+        for (Long userId : userIds) {
+            WebSocketSession session = sessions.get(userId);
+            if (session != null && session.isOpen()) {
+                //离线用户不推送，上线后自动拉取消息记录
+                onlineUserSession.add(session);
+            }
+        }
+        for (WebSocketSession session : onlineUserSession) {
+            String msg = JSONUtil.toJsonStr(message);
+            session.sendMessage(new TextMessage(msg));
+        }
     }
 
 

@@ -20,7 +20,9 @@ public enum MessageStatusEnum {
 
     RECALLED(5, "已撤回"),
 
-    DELETED(6, "已删除");
+    DELETED(6, "已删除"),
+
+    UNREAD(7, "未读");
 
     private final Integer code;
 

@@ -2,6 +2,8 @@ package com.aw.enums;
 
 import lombok.Getter;
 
+import java.util.Objects;
+
 /**
  * 会话类型枚举
  */
@@ -36,6 +38,27 @@ public enum ConversationTypeEnum {
             }
         }
         return SINGLE;
+    }
+
+
+    /**
+     * 是否群聊
+     */
+    public static Boolean isGroup(Integer code) {
+        if (code != null) {
+            return Objects.equals(GROUP.getCode(), code);
+        }
+        return false;
+    }
+
+    /**
+     * 是否私聊
+     */
+    public static Boolean isSingle(Integer code) {
+        if (code != null) {
+            return Objects.equals(SINGLE.getCode(), code);
+        }
+        return false;
     }
 
 }

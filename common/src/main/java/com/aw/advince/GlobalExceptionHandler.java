@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
     // 5. 兜底异常
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
-        log.error("系统异常 traceId={}", TraceIdUtil.getTraceId(), e);
+        log.error(">>>系统异常 traceId={}", TraceIdUtil.getTraceId(), e);
         return Result.fail(BizCodeEnum.UNKNOWN_ERROR);
     }
 }

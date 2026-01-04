@@ -1,4 +1,4 @@
-name: CI/CD + SonarCloud（质量门禁前置）
+name: CI/CD + SonarCloud
 
 on:
   push:

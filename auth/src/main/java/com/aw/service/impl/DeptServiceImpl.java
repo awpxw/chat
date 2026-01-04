@@ -85,7 +85,7 @@ public class DeptServiceImpl implements DeptService {
         BeanUtils.copyProperties(deptDTO, dept);
         int result = deptMapper.insert(dept);
         if (result <= 0) {
-            log.error("保存部门信息失败,部门id:{}", deptDTO.getId());
+            log.error(">>>保存部门信息失败,部门id:{}", deptDTO.getId());
             throw new BizException("保存/更新部门失败");
         }
     }
@@ -99,7 +99,7 @@ public class DeptServiceImpl implements DeptService {
                 .set(Dept::getStatus, deptDTO.getStatus())
                 .update();
         if (!success) {
-            log.error("更新部门信息失败,部门id:{}", deptDTO.getId());
+            log.error(">>>更新部门信息失败,部门id:{}", deptDTO.getId());
             throw new BizException("保存/更新部门失败");
         }
     }

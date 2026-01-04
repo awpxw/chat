@@ -22,7 +22,9 @@ public enum MessageTypeEnum {
 
     SYSTEM(7, "系统消息"),
 
-    READ_RECEIPT(8, "已读回执");
+    READ_RECEIPT(8, "已读回执"),
+
+    FORWARD(9, "转发");
 
     private final Integer code;
 

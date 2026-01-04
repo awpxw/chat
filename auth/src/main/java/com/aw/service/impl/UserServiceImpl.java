@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         Long deptId = userDTO.getDeptId();
         boolean result = ChainWrappers.lambdaUpdateChain(User.class).eq(User::getId, userId).set(User::getDeptId, deptId).update();
         if (!result) {
-            log.error("绑定用户失败,id：{}", userDTO.getId());
+            log.error(">>>绑定用户失败,id：{}", userDTO.getId());
             throw new BizException("绑定用户失败");
         }
     }
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
                 .set(User::getStatus, userDTO.getStatus())
                 .update(user);
         if (!result) {
-            log.error("更新用户失败,id:{}", userDTO.getId());
+            log.error(">>>更新用户失败,id:{}", userDTO.getId());
             throw new BizException("更新用户失败");
         }
     }
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
                 .set(User::getStatus, status)
                 .update();
         if (!success) {
-            log.error("【禁用/启用】员工失败,id:{}", id);
+            log.error(">>>【禁用/启用】员工失败,id:{}", id);
             throw new BizException("【禁用/启用】员工失败");
         }
     }
@@ -198,7 +198,7 @@ public class UserServiceImpl implements UserService {
                 .set(User::getEmail, userDTO.getEmail())
                 .update();
         if (!success) {
-            log.error("更新用户个人信息失败，id：{}", userDTO.getId());
+            log.error(">>>更新用户个人信息失败，id：{}", userDTO.getId());
             throw new BizException("更新用户个人信息失败");
         }
     }
@@ -234,7 +234,7 @@ public class UserServiceImpl implements UserService {
             stringRedisTemplate.opsForValue().set("blacklist:access:" + tokenStr, "__NULL__", ttl, TimeUnit.SECONDS);
         } catch (Exception e) {
             stringRedisTemplate.opsForValue().set("blacklist:access:" + token, "__NULL__", 3600, TimeUnit.SECONDS);
-            log.error("token解析失败");
+            log.error(">>>token解析失败");
         }
     }
 
@@ -296,7 +296,7 @@ public class UserServiceImpl implements UserService {
         Long loginUserId = UserContext.get().getUserId();
         Integer success = userRoleMapper.insertBatch(userRoles, loginUserId);
         if (success <= 0) {
-            log.error("用户分配角色失败，id：{}", loginUserId);
+            log.error(">>>用户分配角色失败，id：{}", loginUserId);
             throw new BizException("用户分配角色失败");
         }
     }
@@ -323,7 +323,7 @@ public class UserServiceImpl implements UserService {
                 .set(User::getDeleted, 1)
                 .update();
         if (!result) {
-            log.error("用户移除失败,id:{}", userDTO.getId());
+            log.error(">>>用户移除失败,id:{}", userDTO.getId());
             throw new BizException("用户移除失败");
         }
     }

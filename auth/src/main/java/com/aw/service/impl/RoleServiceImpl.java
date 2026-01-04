@@ -64,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
                 .eq(Role::getId, role.getId())
                 .update(role);
         if (!success) {
-            log.error("修改角色失败，id：{}", roleDTO.getId());
+            log.error(">>>修改角色失败，id：{}", roleDTO.getId());
             throw new BizException("修改角色失败");
         }
     }
@@ -75,7 +75,7 @@ public class RoleServiceImpl implements RoleService {
         BeanUtils.copyProperties(roleDTO, role);
         int success = roleMapper.insert(role);
         if (success <= 0) {
-            log.error("新增角色失败，id：{}", roleDTO.getId());
+            log.error(">>>新增角色失败，id：{}", roleDTO.getId());
             throw new BizException("新增角色失败");
         }
     }
@@ -124,7 +124,7 @@ public class RoleServiceImpl implements RoleService {
         Long userId = UserContext.get().getUserId();
         Integer success = roleMenuMapper.insertBatch(roleMenus, userId);
         if (success <= 0) {
-            log.error("新增权限失败，角色id：{}", id);
+            log.error(">>>新增权限失败，角色id：{}", id);
             throw new BizException("新增权限失败");
         }
     }
@@ -161,7 +161,7 @@ public class RoleServiceImpl implements RoleService {
                 .set(RoleMenu::getDeleted, 1)
                 .update();
         if (!success) {
-            log.error("删除权限失败，角色id：{}，菜单ids：{}", id, JSONUtil.toJsonStr(menuIds));
+            log.error(">>>删除权限失败，角色id：{}，菜单ids：{}", id, JSONUtil.toJsonStr(menuIds));
             throw new BizException("删除权限失败");
         }
     }

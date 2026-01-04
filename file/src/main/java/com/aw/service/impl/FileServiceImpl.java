@@ -135,7 +135,7 @@ public class FileServiceImpl implements FileService {
     private FileRecord checkFileExist(Long id) throws BizException {
         FileRecord fileRecord = fileRecordMapper.selectById(id);
         if (fileRecord == null) {
-            log.error("文件不存在或已删除，id：{}", id);
+            log.error(">>>文件不存在或已删除，id：{}", id);
             throw new BizException(">>>文件不存在或已删除");
         }
         return fileRecord;
