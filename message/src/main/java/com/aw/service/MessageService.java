@@ -1,6 +1,7 @@
 package com.aw.service;
 
 import com.aw.dto.*;
+import com.aw.vo.AnnouncementVO;
 import com.aw.vo.GlobalSearchVO;
 import com.aw.vo.MessagePullVO;
 
@@ -32,5 +33,10 @@ public interface MessageService {
      * 拉取消息
      */
     MessagePullVO pull(MessagePullDTO dto);
+
+    /**
+     * 群公告
+     */
+    void announcement(ConversationDTO dto);
 
 }

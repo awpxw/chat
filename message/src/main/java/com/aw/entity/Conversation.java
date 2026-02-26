@@ -47,4 +47,9 @@ public class Conversation extends BaseEntity {
      */
     private Boolean mute;
 
+    /**
+     * 群公告
+     */
+    private String announcement;
+
 }

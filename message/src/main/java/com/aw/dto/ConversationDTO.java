@@ -25,4 +25,6 @@ public class ConversationDTO {
     @NotNull
     private String memberOrName;
 
+    private String announcement;
+
 }

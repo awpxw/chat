@@ -18,6 +18,7 @@ import com.aw.mapper.ForwardMsgMapper;
 import com.aw.mapper.MessageMapper;
 import com.aw.service.MessageService;
 import com.aw.utils.HighlightUtil;
+import com.aw.vo.AnnouncementVO;
 import com.aw.vo.GlobalSearchVO;
 import com.aw.vo.MessagePullVO;
 import com.aw.ws.ChatWebSocketHandler;
@@ -121,6 +122,22 @@ public class MessageServiceImpl implements MessageService {
 
         return pullMessage(dto);
 
+    }
+
+    @Override
+    public void announcement(ConversationDTO dto) {
+
+        updateAnnouncement(dto);
+
+    }
+
+    private void updateAnnouncement(ConversationDTO dto) {
+        String announcement = dto.getAnnouncement();
+        Long conversationId = dto.getConversationId();
+        ChainWrappers.lambdaUpdateChain(Conversation.class)
+                .eq(Conversation::getId, conversationId)
+                .set(Conversation::getAnnouncement, announcement)
+                .update();
     }
 
     private MessagePullVO pullMessage(MessagePullDTO dto) {

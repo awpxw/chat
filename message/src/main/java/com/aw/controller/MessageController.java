@@ -3,6 +3,7 @@ package com.aw.controller;
 import com.aw.dto.*;
 import com.aw.exception.Result;
 import com.aw.service.MessageService;
+import com.aw.vo.AnnouncementVO;
 import com.aw.vo.GlobalSearchVO;
 import com.aw.vo.MessagePullVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,8 +60,9 @@ public class MessageController {
 
     @PostMapping("/announcement")
     @Schema(description = "群公告")
-    public void announcement() {
-
+    public Result<String> announcement(ConversationDTO dto) {
+        messageService.announcement(dto);
+        return Result.success();
     }
 
 }
