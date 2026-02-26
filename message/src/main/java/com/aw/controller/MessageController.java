@@ -54,8 +54,9 @@ public class MessageController {
 
     @PostMapping("/reaction")
     @Schema(description = "消息表情回应（点赞、爱等等）")
-    public void reaction() {
-
+    public Result<String> reaction(@RequestBody MessageReactDTO messageReactDTO) {
+        messageService.react(messageReactDTO);
+        return Result.success();
     }
 
     @PostMapping("/announcement")

@@ -2,28 +2,21 @@ package com.aw.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.aw.dto.*;
-import com.aw.entity.Conversation;
-import com.aw.entity.ConversationMember;
-import com.aw.entity.ForwardMsg;
-import com.aw.entity.Message;
-import com.aw.enums.ConversationTypeEnum;
-import com.aw.enums.ForwardTypeEnum;
-import com.aw.enums.MessageStatusEnum;
-import com.aw.enums.MessageTypeEnum;
+import com.aw.entity.*;
+import com.aw.enums.*;
 import com.aw.exception.BizException;
 import com.aw.login.UserContext;
 import com.aw.map.MsgMapper;
 import com.aw.mapper.ConversationMapper;
 import com.aw.mapper.ForwardMsgMapper;
 import com.aw.mapper.MessageMapper;
+import com.aw.mapper.MessageReactMapper;
+import com.aw.redis.RedisUtils;
 import com.aw.service.MessageService;
 import com.aw.utils.HighlightUtil;
-import com.aw.vo.AnnouncementVO;
 import com.aw.vo.GlobalSearchVO;
 import com.aw.vo.MessagePullVO;
-import com.aw.ws.ChatWebSocketHandler;
-import com.aw.ws.ForwardContent;
-import com.aw.ws.ReplyContent;
+import com.aw.ws.*;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +49,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource
     private MsgMapper msgMapper;
+
+    @Resource
+    private MessageReactMapper reactMapper;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     @Override
     public void saveMessage(MessageDTO dto) {
@@ -129,6 +128,46 @@ public class MessageServiceImpl implements MessageService {
 
         updateAnnouncement(dto);
 
+    }
+
+    @Override
+    public void react(MessageReactDTO messageReactDTO) throws IOException {
+
+        reactMsg(messageReactDTO);
+
+    }
+
+    private void reactMsg(MessageReactDTO messageReactDTO) throws IOException {
+        Long messageId = messageReactDTO.getMessageId();
+        MessageReact newMessageReact = MessageReact.builder()
+                .messageId(messageId)
+                .emoji(messageReactDTO.getEmoji())
+                .userId(UserContext.get().getUserId())
+                .build();
+        reactMapper.insert(newMessageReact);
+        //自增
+        redisUtils.increment("react:" + messageId + ":" + messageReactDTO.getEmoji());
+        //获取所有表情计数
+        MessageReactionEmoji[] values = MessageReactionEmoji.values();
+        ArrayList<ReactContent.ReactDetail> reactDetails = new ArrayList<>();
+        for (MessageReactionEmoji emoji : values) {
+            Long num = redisUtils.get("react:" + messageId + ":" + emoji.getOrder());
+            ReactContent.ReactDetail reactDetail = ReactContent.ReactDetail.builder()
+                    .count(num)
+                    .messageId(messageId)
+                    .emoji(emoji.getOrder())
+                    .build();
+            reactDetails.add(reactDetail);
+        }
+        //ws广播表情计数
+        ReactContent reactContent = ReactContent.builder()
+                .reactDetails(reactDetails)
+                .build();
+        Content content = Content.builder()
+                .event(WsEventType.REACTION_UPDATE.getCode())
+                .reactContent(reactContent)
+                .build();
+        chatHandler.broadCast(content);
     }
 
     private void updateAnnouncement(ConversationDTO dto) {

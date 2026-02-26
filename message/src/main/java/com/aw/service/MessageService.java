@@ -39,4 +39,9 @@ public interface MessageService {
      */
     void announcement(ConversationDTO dto);
 
+    /**
+     * 消息表情回应
+     */
+    void react(MessageReactDTO messageReactDTO) throws IOException;
+
 }

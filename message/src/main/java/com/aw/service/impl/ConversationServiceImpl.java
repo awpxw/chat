@@ -4,6 +4,7 @@ import com.aw.dto.ConversationDTO;
 import com.aw.entity.Conversation;
 import com.aw.entity.ConversationMember;
 import com.aw.entity.Message;
+import com.aw.enums.WsEventType;
 import com.aw.exception.BizException;
 import com.aw.login.UserContext;
 import com.aw.map.ConMapper;
@@ -12,6 +13,7 @@ import com.aw.service.ConversationService;
 import com.aw.utils.HighlightUtil;
 import com.aw.vo.ConversationVO;
 import com.aw.ws.ChatWebSocketHandler;
+import com.aw.ws.Content;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +94,11 @@ public class ConversationServiceImpl implements ConversationService {
         Message message = Message.builder()
                 .content("成员： " + userName + " 退出群聊")
                 .build();
-        chatHandler.pushMessage(message, memberIds);
+        Content content = Content.builder()
+                .event(WsEventType.GROUP_MEMBER_LEAVE.getCode())
+                .message(message)
+                .build();
+        chatHandler.pushMessage(content, memberIds);
     }
 
 

@@ -146,4 +146,22 @@ public class RedisUtils {
         redisTemplate.opsForValue().set(key, value, realExpire, unit);
         localCache.put(key, data == null ? NULL_VALUE : data);
     }
+
+    /**
+     * 原子自增 1（推荐用于点赞、浏览量等 +1 场景）
+     * @param key Redis key
+     * @return 自增后的新值
+     */
+    public Long increment(String key) {
+        return redisTemplate.opsForValue().increment(key);
+    }
+
+    public Long get(String key) {
+        String count = redisTemplate.opsForValue().get(key);
+        if (count != null) {
+            return Long.parseLong(count);
+        }
+        return 0L;
+    }
+
 }

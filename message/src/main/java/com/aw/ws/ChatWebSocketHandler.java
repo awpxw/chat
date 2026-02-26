@@ -105,10 +105,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         return onlineUserSession;
     }
 
-    public void pushMessage(Message message, List<Long> userIds) throws IOException {
+    public void pushMessage(Content content, List<Long> userIds) throws IOException {
         List<WebSocketSession> onlineUserSession = getOnlineUserSession(userIds);
         for (WebSocketSession session : onlineUserSession) {
-            String msg = JSONUtil.toJsonStr(message);
+            String msg = JSONUtil.toJsonStr(content);
             session.sendMessage(new TextMessage(msg));
         }
     }
@@ -126,6 +126,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : onlineUserSession) {
             String msg = JSONUtil.toJsonStr(message);
             session.sendMessage(new TextMessage(msg));
+        }
+    }
+
+    public void broadCast(Content message) throws IOException {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                String msg = JSONUtil.toJsonStr(message);
+                session.sendMessage(new TextMessage(msg));
+            }
         }
     }
 
