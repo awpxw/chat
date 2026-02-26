@@ -1,11 +1,10 @@
 package com.aw.controller;
 
-import com.aw.dto.ForwardMsgDTO;
-import com.aw.dto.GlobalSearchDTO;
-import com.aw.dto.MsgReplyDTO;
+import com.aw.dto.*;
 import com.aw.exception.Result;
 import com.aw.service.MessageService;
 import com.aw.vo.GlobalSearchVO;
+import com.aw.vo.MessagePullVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,14 @@ public class MessageController {
 
     @Resource
     private MessageService messageService;
+
+    @PostMapping("/pull")
+    @Schema(description = "拉取消息")
+    public Result<MessagePullVO> pull(@RequestBody MessagePullDTO dto) throws IOException {
+        MessagePullVO vo = messageService.pull(dto);
+        return Result.success(vo);
+    }
+
 
     @PostMapping("/forward")
     @Schema(description = "转发消息（单条或多条）")

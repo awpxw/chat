@@ -1,10 +1,7 @@
 package com.aw.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.aw.dto.ForwardMsgDTO;
-import com.aw.dto.GlobalSearchDTO;
-import com.aw.dto.MessageDTO;
-import com.aw.dto.MsgReplyDTO;
+import com.aw.dto.*;
 import com.aw.entity.Conversation;
 import com.aw.entity.ConversationMember;
 import com.aw.entity.ForwardMsg;
@@ -15,12 +12,14 @@ import com.aw.enums.MessageStatusEnum;
 import com.aw.enums.MessageTypeEnum;
 import com.aw.exception.BizException;
 import com.aw.login.UserContext;
+import com.aw.map.MsgMapper;
 import com.aw.mapper.ConversationMapper;
 import com.aw.mapper.ForwardMsgMapper;
 import com.aw.mapper.MessageMapper;
 import com.aw.service.MessageService;
 import com.aw.utils.HighlightUtil;
 import com.aw.vo.GlobalSearchVO;
+import com.aw.vo.MessagePullVO;
 import com.aw.ws.ChatWebSocketHandler;
 import com.aw.ws.ForwardContent;
 import com.aw.ws.ReplyContent;
@@ -53,6 +52,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource
     private ConversationMapper conversationMapper;
+
+    @Resource
+    private MsgMapper msgMapper;
 
     @Override
     public void saveMessage(MessageDTO dto) {
@@ -112,6 +114,29 @@ public class MessageServiceImpl implements MessageService {
                 .highlights(highLightMsg)
                 .build();
 
+    }
+
+    @Override
+    public MessagePullVO pull(MessagePullDTO dto) {
+
+        return pullMessage(dto);
+
+    }
+
+    private MessagePullVO pullMessage(MessagePullDTO dto) {
+        //未归档的200条最新消息
+        Long conversationId = dto.getConversationId();
+        List<MessagePullVO.MessageDetail> details = ChainWrappers.lambdaQueryChain(Message.class)
+                .eq(Message::getConversationId, conversationId)
+                .eq(Message::getIsArchived, false)
+                .gt(Message::getMsgTime, LocalDateTime.now().minusDays(7))
+                .last("limit 200")
+                .orderByAsc(Message::getMsgTime)
+                .list()
+                .stream()
+                .map(msgMapper::toDetail)
+                .toList();
+        return MessagePullVO.builder().messageDetails(details).build();
     }
 
     private List<String> selectAllMsg(GlobalSearchDTO dto) {
@@ -223,14 +248,14 @@ public class MessageServiceImpl implements MessageService {
             messages = saveSeparate(dto, null);
         } else if (ForwardTypeEnum.isSeparateSingle(forwardType)) {
             //私聊-逐条转发
-            Long conversationId = selectConversation(dto.getTargetUserId(),dto.getTargetUserName());
+            Long conversationId = selectConversation(dto.getTargetUserId(), dto.getTargetUserName());
             messages = saveSeparate(dto, conversationId);
         } else if (ForwardTypeEnum.isMergedGroup(forwardType)) {
             //群聊-合并转发
             messages = saveMerged(dto, null);
         } else if (ForwardTypeEnum.isMergedSingle(forwardType)) {
             //私聊-合并转发
-            Long conversationId = selectConversation(dto.getTargetUserId(),dto.getTargetUserName());
+            Long conversationId = selectConversation(dto.getTargetUserId(), dto.getTargetUserName());
             messages = saveMerged(dto, conversationId);
         } else {
             log.error(">>>不支持的转发类型：{}", dto.getForwardType());
@@ -277,7 +302,7 @@ public class MessageServiceImpl implements MessageService {
         return Collections.singletonList(message);
     }
 
-    private Long selectConversation(Long toUser,String userName) {
+    private Long selectConversation(Long toUser, String userName) {
         Long fromUser = UserContext.get().getUserId();
         Long conversationId = forwardMsgMapper.findConversationByUserId(toUser, fromUser);
         if (conversationId == null) {

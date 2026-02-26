@@ -57,4 +57,9 @@ public class Message extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime msgTime;
 
+    /**
+     * 是否已归档
+     */
+    private Boolean isArchived;
+
 }
