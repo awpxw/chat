@@ -1,70 +1,79 @@
-# Chat（即时通讯）
-> 真正零配置 · 一键启动 · 生产级发版
+# 🧠 Project Title: Advanced Web Application Framework
+The Advanced Web Application Framework is a comprehensive project designed to provide a robust and scalable foundation for building complex web applications. This framework incorporates a wide range of features, including authentication, authorization, API management, and more, making it an ideal choice for developers looking to create secure, efficient, and user-friendly web applications.
 
-## 一句话本地启动（5 秒全套）
+## 🚀 Features
+- **Authentication and Authorization**: Implement robust security mechanisms using JSON Web Tokens (JWT) and role-based access control.
+- **API Management**: Utilize a gateway to manage incoming requests, handle routing, and provide a unified interface for API endpoints.
+- **Error Handling**: Implement a global exception handler to catch and log unexpected errors, ensuring the application remains stable and provides useful feedback.
+- **Access Limiting**: Enforce access limits to prevent abuse and denial-of-service attacks, using aspect-oriented programming (AOP) to implement access limiting logic.
+- **Distributed Tracing**: Utilize trace IDs to track requests as they move through the distributed system, facilitating logging, monitoring, and debugging.
+- **Configuration Management**: Leverage configuration files (e.g., application.yaml, bootstrap.yaml) to manage application settings and bootstrap configurations.
 
-```bash
-# 1. 启动全部中间件（MySQL、Redis、Nacos、MinIO、Kafka 等）
-docker-compose up -d
+## 🛠️ Tech Stack
+- **Backend**: Java, Spring Boot
+- **Database**: MySQL
+- **API Gateway**: GatewayStater
+- **Authentication**: JWT (JSON Web Tokens)
+- **Error Handling**: GlobalExceptionHandler
+- **Access Limiting**: AccessLimitAspect
+- **Distributed Tracing**: TraceIdFilter
+- **Configuration Management**: application.yaml, bootstrap.yaml
+- **Build Tool**: Maven
+- **Dependencies**: MyBatis Plus, Hutool, Lombok, Fastjson2, Redis, Caffeine, Knife4j, Jackson, JJWT, Test, Velocity, AOP, Redisson, Minio, Spring Cloud, Springdoc
 
-# 2. 启动任意微服务（无需本地 application.yml）
-mvn spring-boot:run
-# 或
-java -jar target/auth.jar
+## 📦 Installation
+### Prerequisites
+- Java 11 or higher
+- Maven 3.6 or higher
+- Docker (for containerization)
+
+### Setup Instructions
+1. Clone the repository: `git clone https://github.com/your-repo/advanced-web-application-framework.git`
+2. Navigate to the project directory: `cd advanced-web-application-framework`
+3. Build the project using Maven: `mvn clean package`
+4. Start the application: `java -jar target/advanced-web-application-framework.jar`
+5. Alternatively, use Docker Compose to start the application: `docker-compose up -d`
+
+## 💻 Usage
+- Access the application through the gateway: `http://localhost:8080`
+- Use the API endpoints to interact with the application, e.g., `http://localhost:8080/api/users`
+
+## 📂 Project Structure
+```markdown
+.
+├── pom.xml
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   ├── App.java
+│   │   │   ├── AuthStart.java
+│   │   │   ├── GatewayStater.java
+│   │   │   ├── AuthGlobalFilter.java
+│   │   │   ├── TraceIdFilter.java
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── AccessLimitAspect.java
+│   │   │   ├── JwtUtil.java
+│   │   ├── resources
+│   │   │   ├── application.yaml
+│   │   │   ├── bootstrap.yaml
+│   ├── test
+│   │   ├── java
+│   │   │   ├── TestClass.java
+├── docker-compose.yaml
 ```
 
-所有配置已集中到 Nacos + 环境变量，**克隆即跑！**
+## 📸 Screenshots
 
-## 中间件总览（内网地址） 
+## 🤝 Contributing
+Contributions are welcome! Please submit a pull request with your changes and a brief description of the updates.
 
-| 中间件       | 访问地址                                   | 默认账号 / 密码              | 宿主机端口      | 数据目录                     | 备注                   |
-|--------------|--------------------------------------------|------------------------------|-----------------|------------------------------|------------------------|
-| Nacos        | http://192.168.91.128:8848/nacos           | nacos / nacos                | 8848            | `/data/service/nacos`        | 配置中心 + 注册中心    |
-| MySQL        | http://192.168.91.129:3306                        | root / 123456                | 3306            | `/data/service/mysql`        | 主数据库               |
-| Redis        | http://192.168.91.129:6379                        | 123456                       | 6379            | `/data/service/redis`        | 缓存 + 分布式锁        |
-| MinIO        | http://192.168.91.129:9000                 | minioadmin / minioadmin      | 9000            | `/data/service/minio`        | 对象存储               |
-| Kafka        | http://192.168.91.128:9092                        | 无                           | 9092            | `/data/service/kafka`        | 消息队列               |
-| Prometheus   | http://192.168.91.128:9090                 | 无                           | 9090            | `/data/service/prometheus`   | 监控采集               |
-| Grafana      | http://192.168.91.128:3000                 | admin / admin123             | 3000            | `/data/service/grafana`      | 监控大盘（唯一 UI）    |
-| ClickHouse   | http://192.168.91.128:8123                 | default / （空）             | 8123 / 9001     | `/data/service/clickhouse`   | 日志/实时分析          |
+## 📝 License
+This project is licensed under the MIT License.
 
-## Nacos 公共配置（common.yaml）终极版
-已全面支持环境变量覆盖（本地默认值，生产只改变量）
+## 📬 Contact
+For questions, concerns, or feedback, please contact us at [your-email@example.com](mailto:your-email@example.com).
 
-> 位置：`dev` 命名空间 → `DataId: common.yaml`  
-> 必须配合 `bootstrap.yml` 中的 `shared-configs` 加载
+## 💖 Thanks Message
+This project is made possible by the contributions of many individuals. Thank you to everyone who has participated in the development and maintenance of this framework.
 
-```yaml
-spring:
-  # （支持环境变量覆盖）
-  datasource:
-    url: jdbc:mysql://${MYSQL_HOST:192.168.91.129}:${MYSQL_PORT:3306}/chat?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:123456}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      idle-timeout: 300000
-      connection-timeout: 30000
-      validation-timeout: 5000
-      max-lifetime: 1800000
-      connection-test-query: SELECT 1
-```
-
-## 生产环境部署（只需改这几行）
-
-```bash
-export MYSQL_HOST=172.16.10.100
-export MYSQL_PASSWORD=s3cUr3_MySql_2025
-export REDIS_HOST=172.16.10.101
-export REDIS_PASSWORD=R3d1s_Str0ng_2025
-```
-## 线程池
-线程池名称,用途,核心线程,最大线程,队列大小,拒绝策略
-ioExecutor,所有 IO 密集型（写库、调HTTP、发MQ、写日志）,20~50,100~200,1000~5000,CallerRunsPolicy
-cpuExecutor,CPU 密集型（压缩、加密、复杂计算）,CPU核数,CPU×2,100,AbortPolicy
-warmupExecutor,启动预热（部门树、权限、字典）,2,4,10,CallerRunsPolicy
-scheduledExecutor,定时任务（@Scheduled）,5,10,1000,CallerRunsPolicy
-exportExecutor,大数据导出（Excel、报表）,2~5,10,50,CallerRunsPolicy
+This is written by readme.ai [readme.ai](https://readme-generator-phi.vercel.app/)
