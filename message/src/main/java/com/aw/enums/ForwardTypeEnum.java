@@ -50,5 +50,18 @@ public enum ForwardTypeEnum {
         return false;
     }
 
+    public static Boolean isGroupForward(Integer code) {
+        if (code != null) {
+            return code == MERGED_GROUP.code || code == SEPARATE_GROUP.code;
+        }
+        return false;
+    }
+
+    public static Boolean isSingleForward(Integer code) {
+        if (code != null) {
+            return code == SEPARATE_SINGLE.code || code == MERGED_SINGLE.code;
+        }
+        return false;
+    }
 
 }

@@ -3,19 +3,24 @@ package com.aw.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.aw.dto.ForwardMsgDTO;
 import com.aw.dto.MessageDTO;
+import com.aw.dto.MsgReplyDTO;
+import com.aw.entity.Conversation;
 import com.aw.entity.ConversationMember;
 import com.aw.entity.ForwardMsg;
 import com.aw.entity.Message;
+import com.aw.enums.ConversationTypeEnum;
 import com.aw.enums.ForwardTypeEnum;
 import com.aw.enums.MessageStatusEnum;
 import com.aw.enums.MessageTypeEnum;
 import com.aw.exception.BizException;
 import com.aw.login.UserContext;
+import com.aw.mapper.ConversationMapper;
 import com.aw.mapper.ForwardMsgMapper;
 import com.aw.mapper.MessageMapper;
 import com.aw.service.MessageService;
 import com.aw.ws.ChatWebSocketHandler;
 import com.aw.ws.ForwardContent;
+import com.aw.ws.ReplyContent;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +48,12 @@ public class MessageServiceImpl implements MessageService {
     @Resource
     private ChatWebSocketHandler chatHandler;
 
+    @Resource
+    private ConversationMapper conversationMapper;
+
     @Override
     public void saveMessage(MessageDTO dto) {
-        Message msg = new Message();
+        Message msg = Message.builder().build();
         BeanUtils.copyProperties(dto, msg);
         msg.setSenderId(UserContext.get().getUserId());
         int success = messageMapper.insert(msg);
@@ -58,22 +66,94 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void forward(ForwardMsgDTO dto) throws IOException {
 
+        saveBeforeForward(dto);
+
         forwardMsgByType(dto);
 
+    }
+
+    private void saveBeforeForward(ForwardMsgDTO dto) {
+        Long senderId = UserContext.get().getUserId();
+        String content = JSONUtil.toJsonStr(dto.getOriginalMessageIds());
+        Message message = Message.builder()
+                .conversationId(dto.getTargetUserId())
+                .senderId(senderId)
+                .content(content)
+                .msgTime(LocalDateTime.now())
+                .msgType(MessageTypeEnum.FORWARD.getCode())
+                .build();
+        int success = messageMapper.insert(message);
+        if (success <= 0) {
+            log.error("转发消息保存失败，msg：{}", JSONUtil.toJsonStr(message));
+            throw new BizException("转发消息保存失败");
+        }
+    }
+
+    @Override
+    public void reply(MsgReplyDTO dto) throws IOException {
+
+        saveBeforeReply(dto);
+
+        concatAndReply(dto);
+
+    }
+
+    private void saveBeforeReply(MsgReplyDTO dto) {
+        Message message = Message.builder().conversationId(dto.getConversationId())
+                .senderId(UserContext.get().getUserId())
+                .content(dto.getMsg())
+                .msgTime(LocalDateTime.now())
+                .extra(null)
+                .build();
+        int success = messageMapper.insert(message);
+        if (success <= 0) {
+            log.error("保存消息失败，msg：{}", JSONUtil.toJsonStr(message));
+            throw new BizException("保存消息失败");
+        }
+    }
+
+    /**
+     * 回复消息
+     */
+    private void concatAndReply(MsgReplyDTO dto) throws IOException {
+        Long fromId = UserContext.get().getUserId();
+        Long conversationId = dto.getConversationId();
+        //判断会话类型
+        Conversation conversation = conversationMapper.selectById(conversationId);
+        if (conversation == null) {
+            log.error("未找到会话，id：{}", conversationId);
+            throw new BizException("未找到会话");
+        }
+        if (ConversationTypeEnum.isGroup(conversation.getType())) {
+            //回复群聊
+            List<Long> memberIds = getMemberIds(conversation.getId());
+            for (Long toId : memberIds) {
+                ReplyContent replyContent = ReplyContent.replyContent(true, fromId, toId, dto.getMsg(), dto.getReferenceMsg());
+                chatHandler.replyMessage(replyContent, Collections.singletonList(toId));
+            }
+        } else if (ConversationTypeEnum.isSingle(conversation.getType())) {
+            //回复私聊
+            List<Long> memberIds = getMemberIds(conversation.getId());
+            ReplyContent replyContent = ReplyContent.replyContent(false, fromId, memberIds.get(0), dto.getMsg(), dto.getReferenceMsg());
+            chatHandler.replyMessage(replyContent, Collections.singletonList(memberIds.get(0)));
+        } else {
+            log.error("不支持的会话类型，type：{}", conversation.getType());
+            throw new BizException("不支持的会话类型");
+        }
     }
 
     private void forwardMsgByType(ForwardMsgDTO dto) throws IOException {
 
         List<Message> messages = saveForwardRecordAndMsg(dto);
 
-        pushMsg(messages, dto);
+        forwardMsg(messages, dto);
 
     }
 
     /**
      * 消息转发（核心方法）
      */
-    private void pushMsg(List<Message> messages, ForwardMsgDTO dto) throws IOException {
+    private void forwardMsg(List<Message> messages, ForwardMsgDTO dto) throws IOException {
         List<String> msgStr = messages.stream().map(JSONUtil::toJsonStr).toList();
         Integer forwardType = dto.getForwardType();
         if (ForwardTypeEnum.isSeparateSingle(forwardType)) {
@@ -82,14 +162,14 @@ public class MessageServiceImpl implements MessageService {
             chatHandler.forwardMessage(forwardContent, Collections.singletonList(dto.getTargetUserId()));
         } else if (ForwardTypeEnum.isSeparateGroup(forwardType)) {
             //群聊逐条转发
-            List<Long> userIds = getMemberIds(dto);
+            List<Long> userIds = getMemberIds(dto.getTargetGroupId());
             for (Long userId : userIds) {
                 ForwardContent forwardContent = ForwardContent.forwardContent(forwardType, UserContext.get().getUserId(), userId, msgStr);
                 chatHandler.forwardMessage(forwardContent, Collections.singletonList(dto.getTargetUserId()));
             }
         } else if (ForwardTypeEnum.isMergedGroup(forwardType)) {
             //群聊合并转发
-            List<Long> userIds = getMemberIds(dto);
+            List<Long> userIds = getMemberIds(dto.getTargetGroupId());
             for (Long userId : userIds) {
                 ForwardContent forwardContent = ForwardContent.forwardContent(forwardType, UserContext.get().getUserId(), userId, msgStr);
                 chatHandler.forwardMessage(forwardContent, Collections.singletonList(dto.getTargetUserId()));
@@ -103,8 +183,8 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-    private List<Long> getMemberIds(ForwardMsgDTO dto) {
-        return ChainWrappers.lambdaQueryChain(ConversationMember.class).eq(ConversationMember::getConversationId, dto.getTargetGroupId()).list().stream().map(ConversationMember::getUserId).toList();
+    private List<Long> getMemberIds(Long conversationId) {
+        return ChainWrappers.lambdaQueryChain(ConversationMember.class).eq(ConversationMember::getConversationId, conversationId).list().stream().map(ConversationMember::getUserId).toList();
     }
 
     private List<Message> saveForwardRecordAndMsg(ForwardMsgDTO dto) {
@@ -133,7 +213,7 @@ public class MessageServiceImpl implements MessageService {
 
     private List<Message> saveSeparate(ForwardMsgDTO dto, Long conversationId) {
         List<Message> originMsg = selectMsgByIds(dto.getOriginalMessageIds());
-        Message message = new Message();
+        Message message = Message.builder().build();
         ForwardMsg forwardMsg = new ForwardMsg();
         List<Message> messages = new ArrayList<>();
         List<ForwardMsg> forwardMessages = new ArrayList<>();
@@ -155,7 +235,7 @@ public class MessageServiceImpl implements MessageService {
 
     private List<Message> saveMerged(ForwardMsgDTO dto, Long conversationId) {
         List<Message> originMsg = selectMsgByIds(dto.getOriginalMessageIds());
-        Message message = new Message();
+        Message message = Message.builder().build();
         ForwardMsg forwardMsg = new ForwardMsg();
         message.setConversationId(conversationId == null ? dto.getTargetGroupId() : conversationId).setSenderId(UserContext.get().getUserId()).setMsgType(MessageTypeEnum.FORWARD.getCode()).setContent(JSONUtil.toJsonStr(originMsg)).setMsgTime(LocalDateTime.now()).setStatus(MessageStatusEnum.UNREAD.getCode());
         List<Long> msgIdList = originMsg.stream().map(Message::getId).toList();

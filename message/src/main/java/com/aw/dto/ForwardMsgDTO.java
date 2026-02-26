@@ -11,6 +11,9 @@ import java.util.List;
 @Data
 public class ForwardMsgDTO {
 
+    @Schema(description = "转发群id")
+    private Long conversationId;
+
     @Schema(description = "转发类型")
     private Integer forwardType;
 

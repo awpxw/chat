@@ -2,6 +2,7 @@ package com.aw.service;
 
 import com.aw.dto.ForwardMsgDTO;
 import com.aw.dto.MessageDTO;
+import com.aw.dto.MsgReplyDTO;
 
 import java.io.IOException;
 
@@ -16,5 +17,10 @@ public interface MessageService {
      * 转发消息
      */
     void forward(ForwardMsgDTO dto) throws IOException;
+
+    /**
+     * 回复消息
+     */
+    void reply(MsgReplyDTO dto) throws IOException;
 
 }

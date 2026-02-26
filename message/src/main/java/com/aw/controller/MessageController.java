@@ -1,6 +1,7 @@
 package com.aw.controller;
 
 import com.aw.dto.ForwardMsgDTO;
+import com.aw.dto.MsgReplyDTO;
 import com.aw.exception.Result;
 import com.aw.service.MessageService;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,10 +29,11 @@ public class MessageController {
         return Result.success();
     }
 
-    @PostMapping("/reply/{msgId}")
+    @PostMapping("/reply")
     @Schema(description = "回复指定消息（带引用）")
-    public void reply() {
-
+    public Result<String> reply(@RequestBody MsgReplyDTO dto) {
+        messageService.reply(dto);
+        return Result.success();
     }
 
     @PostMapping("/global/search")
@@ -39,6 +41,7 @@ public class MessageController {
     public void globalSearch() {
 
     }
+
     @PostMapping("/search")
     @Schema(description = "搜索会话（按名称/成员）")
     public void search() {
@@ -50,11 +53,13 @@ public class MessageController {
     public void reaction() {
 
     }
+
     @PostMapping("/archive")
     @Schema(description = "归档会话（隐藏但保留）")
     public void archive() {
 
     }
+
     @PostMapping("/announcement")
     @Schema(description = "群公告")
     public void announcement() {

@@ -22,4 +22,5 @@ public interface ForwardMsgMapper extends BaseMapper<ForwardMsg> {
      */
     Long findConversationByUserId(@Param("toUser") Long toUser,
                                   @Param("fromUser") Long fromUser);
+
 }

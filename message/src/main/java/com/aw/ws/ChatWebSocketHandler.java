@@ -121,4 +121,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void replyMessage(ReplyContent message, List<Long> userIds) throws IOException {
+        List<WebSocketSession> onlineUserSession = getOnlineUserSession(userIds);
+        for (WebSocketSession session : onlineUserSession) {
+            String msg = JSONUtil.toJsonStr(message);
+            session.sendMessage(new TextMessage(msg));
+        }
+    }
+
 }
