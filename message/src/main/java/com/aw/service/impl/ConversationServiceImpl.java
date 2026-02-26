@@ -3,6 +3,7 @@ package com.aw.service.impl;
 import com.aw.dto.ConversationDTO;
 import com.aw.entity.Conversation;
 import com.aw.entity.ConversationMember;
+import com.aw.entity.Message;
 import com.aw.exception.BizException;
 import com.aw.login.UserContext;
 import com.aw.map.ConMapper;
@@ -10,13 +11,16 @@ import com.aw.mapper.ConversationMapper;
 import com.aw.service.ConversationService;
 import com.aw.utils.HighlightUtil;
 import com.aw.vo.ConversationVO;
+import com.aw.ws.ChatWebSocketHandler;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -30,6 +34,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Resource
     private ConMapper conMapper;
+
+    @Resource
+    private ChatWebSocketHandler chatHandler;
 
     @Override
     public Long create(ConversationDTO dto) {
@@ -65,9 +72,43 @@ public class ConversationServiceImpl implements ConversationService {
 
     }
 
+    @Override
+    public void quitNotify(ConversationDTO dto) throws IOException {
+
+        quit(dto);
+
+        notifyOtherMember(dto);
+
+    }
+
+    private void notifyOtherMember(ConversationDTO dto) throws IOException {
+        Long conversationId = dto.getConversationId();
+        String userName = UserContext.get().getUsername();
+        List<ConversationMember> members = ChainWrappers.lambdaQueryChain(ConversationMember.class)
+                .in(ConversationMember::getConversationId, conversationId)
+                .list();
+        List<Long> memberIds = members.stream().map(ConversationMember::getUserId).toList();
+        //退群通知
+        Message message = Message.builder()
+                .content("成员： " + userName + " 退出群聊")
+                .build();
+        chatHandler.pushMessage(message, memberIds);
+    }
+
+
+    private void quit(ConversationDTO dto) {
+        Long conversationId = dto.getConversationId();
+        Long userId = UserContext.get().getUserId();
+        //移除群成员
+        ChainWrappers.lambdaUpdateChain(ConversationMember.class)
+                .in(ConversationMember::getConversationId, conversationId)
+                .eq(ConversationMember::getUserId, userId)
+                .remove();
+    }
+
     private List<ConversationVO.ConversationDetail> highLightByMember(List<ConversationVO.ConversationDetail> byMembers, String memberOrName) {
         return byMembers.stream().peek(t -> {
-            t.setKeyWord("成员："+ memberOrName);
+            t.setKeyWord("成员：" + memberOrName);
             String keyword = HighlightUtil.highlightKeyword(t.getKeyWord(), memberOrName);
             t.setKeyWord(keyword);
         }).toList();

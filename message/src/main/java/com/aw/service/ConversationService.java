@@ -3,6 +3,8 @@ package com.aw.service;
 import com.aw.dto.ConversationDTO;
 import com.aw.vo.ConversationVO;
 
+import java.io.IOException;
+
 public interface ConversationService {
 
     /**
@@ -19,5 +21,10 @@ public interface ConversationService {
      * 搜索会话（按名称/成员）
      */
     ConversationVO search(ConversationDTO dto);
+
+    /**
+     * 退群通知
+     */
+    void quitNotify(ConversationDTO dto) throws IOException;
 
 }

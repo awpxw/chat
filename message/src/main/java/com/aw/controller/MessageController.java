@@ -30,7 +30,6 @@ public class MessageController {
         return Result.success(vo);
     }
 
-
     @PostMapping("/forward")
     @Schema(description = "转发消息（单条或多条）")
     public Result<String> forward(@RequestBody ForwardMsgDTO dto) throws IOException {
@@ -58,21 +57,9 @@ public class MessageController {
 
     }
 
-    @PostMapping("/archive")
-    @Schema(description = "归档会话（隐藏但保留）")
-    public void archive() {
-
-    }
-
     @PostMapping("/announcement")
     @Schema(description = "群公告")
     public void announcement() {
-
-    }
-
-    @PostMapping("/quit-notification")
-    @Schema(description = "成员退出群通知")
-    public void quitNotification() {
 
     }
 
