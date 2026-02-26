@@ -1,8 +1,10 @@
 package com.aw.service;
 
 import com.aw.dto.ForwardMsgDTO;
+import com.aw.dto.GlobalSearchDTO;
 import com.aw.dto.MessageDTO;
 import com.aw.dto.MsgReplyDTO;
+import com.aw.vo.GlobalSearchVO;
 
 import java.io.IOException;
 
@@ -22,5 +24,10 @@ public interface MessageService {
      * 回复消息
      */
     void reply(MsgReplyDTO dto) throws IOException;
+
+    /**
+     * 全局搜索
+     */
+    GlobalSearchVO globalSearch(GlobalSearchDTO dto);
 
 }

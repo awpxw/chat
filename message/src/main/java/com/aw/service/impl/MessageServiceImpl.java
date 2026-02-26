@@ -2,6 +2,7 @@ package com.aw.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.aw.dto.ForwardMsgDTO;
+import com.aw.dto.GlobalSearchDTO;
 import com.aw.dto.MessageDTO;
 import com.aw.dto.MsgReplyDTO;
 import com.aw.entity.Conversation;
@@ -18,9 +19,13 @@ import com.aw.mapper.ConversationMapper;
 import com.aw.mapper.ForwardMsgMapper;
 import com.aw.mapper.MessageMapper;
 import com.aw.service.MessageService;
+import com.aw.utils.HighlightUtil;
+import com.aw.vo.GlobalSearchVO;
 import com.aw.ws.ChatWebSocketHandler;
 import com.aw.ws.ForwardContent;
 import com.aw.ws.ReplyContent;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +37,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -95,6 +102,31 @@ public class MessageServiceImpl implements MessageService {
 
         concatAndReply(dto);
 
+    }
+
+    @Override
+    public GlobalSearchVO globalSearch(GlobalSearchDTO dto) {
+
+        List<String> msg = selectAllMsg(dto);
+
+        List<String> highLightMsg = highLight(msg, dto.getKeyword());
+
+        return GlobalSearchVO.builder()
+                .highlights(highLightMsg)
+                .build();
+
+    }
+
+    private List<String> selectAllMsg(GlobalSearchDTO dto) {
+        Long conversationId = dto.getConversationId();
+        List<Message> msg = ChainWrappers.lambdaQueryChain(Message.class)
+                .eq(Message::getConversationId, conversationId)
+                .list();
+        return msg.stream().sorted(Comparator.comparing(Message::getMsgTime)).map(Message::getContent).collect(Collectors.toList());
+    }
+
+    private List<String> highLight(List<String> msg, String keyword) {
+        return HighlightUtil.highlightKeywords(msg, keyword);
     }
 
     private void saveBeforeReply(MsgReplyDTO dto) {

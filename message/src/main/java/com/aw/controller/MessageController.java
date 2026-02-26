@@ -1,9 +1,11 @@
 package com.aw.controller;
 
 import com.aw.dto.ForwardMsgDTO;
+import com.aw.dto.GlobalSearchDTO;
 import com.aw.dto.MsgReplyDTO;
 import com.aw.exception.Result;
 import com.aw.service.MessageService;
+import com.aw.vo.GlobalSearchVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +40,9 @@ public class MessageController {
 
     @PostMapping("/global/search")
     @Schema(description = "全局消息搜索（关键词）")
-    public void globalSearch() {
-
+    public Result<GlobalSearchVO> globalSearch(@RequestBody GlobalSearchDTO dto) {
+        GlobalSearchVO globalSearchVO = messageService.globalSearch(dto);
+        return Result.success(globalSearchVO);
     }
 
     @PostMapping("/search")
