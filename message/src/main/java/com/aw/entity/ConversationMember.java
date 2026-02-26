@@ -32,6 +32,11 @@ public class ConversationMember extends BaseEntity {
     private Long userId;
 
     /**
+     * 用户名
+     */
+    private String userName;
+
+    /**
      * 角色：0-普通 1-管理员 2-隐身人
      */
     private Integer role;

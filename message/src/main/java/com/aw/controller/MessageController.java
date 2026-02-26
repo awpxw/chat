@@ -45,12 +45,6 @@ public class MessageController {
         return Result.success(globalSearchVO);
     }
 
-    @PostMapping("/search")
-    @Schema(description = "搜索会话（按名称/成员）")
-    public void search() {
-
-    }
-
     @PostMapping("/reaction")
     @Schema(description = "消息表情回应（点赞、爱等等）")
     public void reaction() {

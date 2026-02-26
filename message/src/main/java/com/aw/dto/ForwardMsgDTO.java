@@ -23,6 +23,9 @@ public class ForwardMsgDTO {
     @Schema(description = "转发用户id")
     private Long targetUserId;
 
+    @Schema(description = "转发用户姓名")
+    private String targetUserName;
+
     @Schema(description = "转发群id")
     private Long targetGroupId;
 

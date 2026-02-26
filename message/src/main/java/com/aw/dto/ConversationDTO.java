@@ -22,4 +22,7 @@ public class ConversationDTO {
     @NotNull(groups = {ConversationCreate.class})
     private Integer type;
 
+    @NotNull
+    private String memberOrName;
+
 }

@@ -24,12 +24,9 @@ import com.aw.vo.GlobalSearchVO;
 import com.aw.ws.ChatWebSocketHandler;
 import com.aw.ws.ForwardContent;
 import com.aw.ws.ReplyContent;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -226,14 +223,14 @@ public class MessageServiceImpl implements MessageService {
             messages = saveSeparate(dto, null);
         } else if (ForwardTypeEnum.isSeparateSingle(forwardType)) {
             //私聊-逐条转发
-            Long conversationId = selectConversation(dto.getTargetUserId());
+            Long conversationId = selectConversation(dto.getTargetUserId(),dto.getTargetUserName());
             messages = saveSeparate(dto, conversationId);
         } else if (ForwardTypeEnum.isMergedGroup(forwardType)) {
             //群聊-合并转发
             messages = saveMerged(dto, null);
         } else if (ForwardTypeEnum.isMergedSingle(forwardType)) {
             //私聊-合并转发
-            Long conversationId = selectConversation(dto.getTargetUserId());
+            Long conversationId = selectConversation(dto.getTargetUserId(),dto.getTargetUserName());
             messages = saveMerged(dto, conversationId);
         } else {
             log.error(">>>不支持的转发类型：{}", dto.getForwardType());
@@ -280,21 +277,21 @@ public class MessageServiceImpl implements MessageService {
         return Collections.singletonList(message);
     }
 
-    private Long selectConversation(Long toUser) {
+    private Long selectConversation(Long toUser,String userName) {
         Long fromUser = UserContext.get().getUserId();
         Long conversationId = forwardMsgMapper.findConversationByUserId(toUser, fromUser);
         if (conversationId == null) {
-            conversationId = createConversation(toUser);
+            conversationId = createConversation(userName);
         }
         return conversationId;
     }
 
-    private Long createConversation(Long toUser) {
+    private Long createConversation(String userName) {
         Long creatorId = UserContext.get().getUserId();
-        String name = creatorId + "," + toUser;
+        //私聊以用户名作为会话名
         Conversation conversation = Conversation.builder()
                 .creatorId(creatorId)
-                .name(name)
+                .name(userName)
                 .type(ConversationTypeEnum.SINGLE.getCode())
                 .isPinned(true)
                 .mute(false)

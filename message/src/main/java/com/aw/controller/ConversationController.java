@@ -2,10 +2,13 @@ package com.aw.controller;
 
 import com.aw.dto.ConversationDTO;
 import com.aw.dto.group.ConversationCreate;
+import com.aw.dto.group.ConversationSearch;
 import com.aw.dto.group.ConversationUnreadTotal;
 import com.aw.exception.Result;
 import com.aw.service.ConversationService;
 import com.aw.validate.ValidatorUtil;
+import com.aw.vo.ConversationVO;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +31,14 @@ public class ConversationController {
         ValidatorUtil.validate(dto, ConversationUnreadTotal.class);
         Integer unreadTotal = conversationService.unreadTotal(dto);
         return Result.success(unreadTotal);
+    }
+
+    @PostMapping("/search")
+    @Schema(description = "搜索会话（按名称/成员）")
+    public Result<ConversationVO> search(@RequestBody ConversationDTO dto) {
+        ValidatorUtil.validate(dto, ConversationSearch.class);
+        ConversationVO conversationVO = conversationService.search(dto);
+        return Result.success(conversationVO);
     }
 
 }

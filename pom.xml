@@ -43,10 +43,24 @@
         <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
         <mysql.verison>8.3.0</mysql.verison>
         <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
+        <mapstruct.version>1.6.3</mapstruct.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-mapstruct-binding</artifactId>
+                <version>0.2.0</version> <!-- 最新版 -->
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
