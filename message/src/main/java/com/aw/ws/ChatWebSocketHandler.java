@@ -93,7 +93,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         return jwtUtil.getUserId(token);
     }
 
-    public void pushMessage(Message message, List<Long> userIds) throws IOException {
+    private List<WebSocketSession> getOnlineUserSession(List<Long> userIds) {
         List<WebSocketSession> onlineUserSession = new ArrayList<>();
         for (Long userId : userIds) {
             WebSocketSession session = sessions.get(userId);
@@ -102,11 +102,23 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 onlineUserSession.add(session);
             }
         }
+        return onlineUserSession;
+    }
+
+    public void pushMessage(Message message, List<Long> userIds) throws IOException {
+        List<WebSocketSession> onlineUserSession = getOnlineUserSession(userIds);
         for (WebSocketSession session : onlineUserSession) {
             String msg = JSONUtil.toJsonStr(message);
             session.sendMessage(new TextMessage(msg));
         }
     }
 
+    public void forwardMessage(ForwardContent message, List<Long> userIds) throws IOException {
+        List<WebSocketSession> onlineUserSession = getOnlineUserSession(userIds);
+        for (WebSocketSession session : onlineUserSession) {
+            String msg = JSONUtil.toJsonStr(message);
+            session.sendMessage(new TextMessage(msg));
+        }
+    }
 
 }
