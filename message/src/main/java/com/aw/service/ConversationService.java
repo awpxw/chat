@@ -9,4 +9,9 @@ public interface ConversationService {
      */
     Integer unreadTotal(ConversationDTO dto);
 
+    /**
+     * 创建会话
+     */
+    Long create(ConversationDTO dto);
+
 }

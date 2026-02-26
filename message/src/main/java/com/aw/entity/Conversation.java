@@ -2,12 +2,14 @@ package com.aw.entity;
 
 import com.aw.fill.BaseEntity;
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
 @TableName("t_conversation")
+@Builder
 public class Conversation extends BaseEntity {
 
     /**

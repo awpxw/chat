@@ -31,7 +31,7 @@ public class MessageController {
 
     @PostMapping("/reply")
     @Schema(description = "回复指定消息（带引用）")
-    public Result<String> reply(@RequestBody MsgReplyDTO dto) {
+    public Result<String> reply(@RequestBody MsgReplyDTO dto) throws IOException {
         messageService.reply(dto);
         return Result.success();
     }

@@ -24,7 +24,7 @@ import com.aw.ws.ReplyContent;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -84,7 +83,7 @@ public class MessageServiceImpl implements MessageService {
                 .build();
         int success = messageMapper.insert(message);
         if (success <= 0) {
-            log.error("转发消息保存失败，msg：{}", JSONUtil.toJsonStr(message));
+            log.error(">>>转发消息保存失败，msg：{}", JSONUtil.toJsonStr(message));
             throw new BizException("转发消息保存失败");
         }
     }
@@ -107,7 +106,7 @@ public class MessageServiceImpl implements MessageService {
                 .build();
         int success = messageMapper.insert(message);
         if (success <= 0) {
-            log.error("保存消息失败，msg：{}", JSONUtil.toJsonStr(message));
+            log.error(">>>保存消息失败，msg：{}", JSONUtil.toJsonStr(message));
             throw new BizException("保存消息失败");
         }
     }
@@ -121,7 +120,7 @@ public class MessageServiceImpl implements MessageService {
         //判断会话类型
         Conversation conversation = conversationMapper.selectById(conversationId);
         if (conversation == null) {
-            log.error("未找到会话，id：{}", conversationId);
+            log.error(">>>未找到会话，id：{}", conversationId);
             throw new BizException("未找到会话");
         }
         if (ConversationTypeEnum.isGroup(conversation.getType())) {
@@ -137,7 +136,7 @@ public class MessageServiceImpl implements MessageService {
             ReplyContent replyContent = ReplyContent.replyContent(false, fromId, memberIds.get(0), dto.getMsg(), dto.getReferenceMsg());
             chatHandler.replyMessage(replyContent, Collections.singletonList(memberIds.get(0)));
         } else {
-            log.error("不支持的会话类型，type：{}", conversation.getType());
+            log.error(">>>不支持的会话类型，type：{}", conversation.getType());
             throw new BizException("不支持的会话类型");
         }
     }
@@ -253,14 +252,27 @@ public class MessageServiceImpl implements MessageService {
         Long fromUser = UserContext.get().getUserId();
         Long conversationId = forwardMsgMapper.findConversationByUserId(toUser, fromUser);
         if (conversationId == null) {
-            conversationId = createConversation();
+            conversationId = createConversation(toUser);
         }
         return conversationId;
     }
 
-    private Long createConversation() {
-        //todo 创建会话
-        return 1L;
+    private Long createConversation(Long toUser) {
+        Long creatorId = UserContext.get().getUserId();
+        String name = creatorId + "," + toUser;
+        Conversation conversation = Conversation.builder()
+                .creatorId(creatorId)
+                .name(name)
+                .type(ConversationTypeEnum.SINGLE.getCode())
+                .isPinned(true)
+                .mute(false)
+                .build();
+        int insert = conversationMapper.insert(conversation);
+        if (insert != 1) {
+            log.error(">>>创建会话失败");
+            throw new BizException("创建会话失败");
+        }
+        return conversation.getId();
     }
 
     private List<Message> selectMsgByIds(List<Long> msgIds) {
