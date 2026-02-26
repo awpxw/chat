@@ -18,4 +18,5 @@ public class GatewayStater
     public static void main(String[] args) {
         SpringApplication.run(GatewayStater.class, args);
     }
+
 }

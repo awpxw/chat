@@ -4,6 +4,8 @@ package com.aw.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,17 +17,19 @@ import java.util.Map;
  * 所有项目引用 common 模块后，只需在 application.yml 配置 jwt.xxx 即可
  */
 @Component
+@Data
 public class JwtUtil {
 
     private final JwtProperties properties;
 
-    private SecretKey key;
+    public SecretKey key;
 
     public JwtUtil(JwtProperties properties) {
         this.properties = properties;
     }
 
 
+    @PostConstruct
     public void init() {
         // 自动生成安全的 HMAC 密钥（要求 secret >= 256 bit）
         this.key = Keys.hmacShaKeyFor(properties.getSecret().getBytes());
@@ -36,6 +40,13 @@ public class JwtUtil {
      */
     public String generateAccessToken(Long userId, String username, Map<String, Object> extraClaims) {
         return generateToken(userId, username, extraClaims, properties.getAccessExpire());
+    }
+
+    /**
+     * 生成 AccessToken
+     */
+    public String generateAccessTokenWithExpired(Long userId, String username, Map<String, Object> extraClaims, Long expiredAt) {
+        return generateToken(userId, username, extraClaims, expiredAt);
     }
 
     /**

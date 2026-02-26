@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class IdWorker {
+
     private final SnowflakeIdWorker snowflake;
 
     public long nextId() {
@@ -15,4 +16,5 @@ public class IdWorker {
     public String nextIdStr() {
         return String.valueOf(snowflake.nextId());
     }
+
 }

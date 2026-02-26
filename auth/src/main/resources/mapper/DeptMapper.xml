@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aw.mapper.DeptMapper">
+
+    <update id="logicDeleteWithChildren">
+        WITH RECURSIVE dept_tree AS (SELECT id
+                                     FROM t_dept
+                                     WHERE id = #{deptId}
+                                     UNION ALL
+                                     SELECT d.id
+                                     FROM t_dept d
+                                              INNER JOIN dept_tree dt ON d.parent_id = dt.id)
+        UPDATE t_dept
+        SET deleted = 1
+        WHERE id IN (SELECT id FROM dept_tree)
+    </update>
+
+</mapper>

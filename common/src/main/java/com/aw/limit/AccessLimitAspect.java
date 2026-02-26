@@ -1,8 +1,9 @@
 // common/src/main/java/com/aw/common/aspect/AccessLimitAspect.java
 package com.aw.limit;
 
-import com.aw.trace.BizException;
+import com.aw.exception.BizException;
 import com.aw.utils.RequestIdUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -57,7 +57,7 @@ public class AccessLimitAspect {
             String.valueOf(accessLimit.seconds())
         );
 
-        if (result == null || result == 0) {
+        if (result == 0) {
             log.warn("接口限流触发 => key={}, method={}, ip={}, requestId={}",
                 key, request.getMethod(), getIp(request), RequestIdUtil.get());
             throw new BizException(10002, accessLimit.message());
@@ -74,7 +74,7 @@ public class AccessLimitAspect {
                 break;
 
             case USER:
-                String userId = (String) request.getAttribute("userId");
+                String userId = request.getHeader("X-User-Id");
                 key = prefix + ":user:" + (userId != null ? userId : "anonymous");
                 break;
 

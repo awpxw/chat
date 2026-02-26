@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aw.mapper.ConversationMemberMapper">
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO t_conversation_member (
+        id,
+        conversation_id,
+        user_id,
+        role,
+        unread_count,
+        last_read_msg_id,
+        last_read_time,
+        joined_time,
+        status,
+        create_time,
+        create_user,
+        create_user_name,
+        update_time,
+        update_user,
+        update_user_name,
+        deleted
+        ) VALUES
+        <foreach collection="members" item="item" index="index" separator=",">
+            (
+            #{item.id},
+            #{item.conversationId},
+            #{item.userId},
+            #{item.role},
+            null,
+            null,
+            NOW(),
+            null,
+            1,
+            NOW(),
+            #{user.userId},
+            #{user.username},
+            NOW(),
+            #{user.userId},
+            #{user.username},
+            0
+            )
+        </foreach>
+    </insert>
+
+</mapper>

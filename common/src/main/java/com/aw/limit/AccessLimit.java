@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface AccessLimit {
     // 限制次数
-    int count() default 10;
+    int count() default 100;
 
     // 时间窗口（秒）
     int seconds() default 1;

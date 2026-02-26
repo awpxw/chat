@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aw.mapper.ForwardMsgMapper">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_forward_msg (
+        msg_id,
+        forward_user_id,
+        forward_time,
+        status,
+        create_time,
+        create_user,
+        create_user_name,
+        update_time,
+        update_user,
+        update_user_name,
+        deleted
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.msgId},
+            #{item.forwardUserId},
+            #{item.forwardTime},
+            1,
+            NOW(),
+            #{user.userId},
+            #{user.userName},
+            NOW(),
+            #{user.userId},
+            #{user.userName},
+            0
+            )
+        </foreach>
+    </insert>
+
+    <select id="findConversationByUserId" resultType="Long">
+        SELECT cm1.conversation_id
+        FROM t_conversation_member cm1
+                 INNER JOIN t_conversation_member cm2
+                            ON cm1.conversation_id = cm2.conversation_id
+        WHERE cm1.deleted = 0
+          AND cm2.deleted = 0
+          AND cm1.type = 1
+          AND cm2.type = 1
+          AND cm1.user_id = #{fromUser}
+          AND cm2.user_id = #{toUser}
+          AND cm1.status = 1
+          AND cm2.status = 1 LIMIT 1
+    </select>
+
+</mapper>
